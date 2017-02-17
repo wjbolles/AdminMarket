@@ -107,7 +107,7 @@ public class TransactionManager {
     }
 
     public boolean sellHand(Player player) {
-        ItemStack hand = player.getItemInHand();
+        ItemStack hand = player.getInventory().getItemInMainHand();
         ItemStack stack = new ItemStack(hand.getType(), 1, hand.getDurability());
 
         ItemListing listing = lm.getListing(stack);
@@ -135,7 +135,7 @@ public class TransactionManager {
         plugin.getEconomy().deposit(player, totalCost);
         
         // Clear hand
-        player.setItemInHand(null);
+        player.getInventory().setItemInMainHand(null);
         player.sendMessage("Sold for: " + ChatColor.GREEN + "+$" + df.format(totalCost));
         
         if (!listing.isInfinite()) {

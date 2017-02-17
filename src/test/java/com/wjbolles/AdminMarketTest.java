@@ -11,6 +11,7 @@ package com.wjbolles;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -19,6 +20,13 @@ import com.wjbolles.eco.ListingManager;
 import com.wjbolles.eco.TransactionManager;
 
 import com.wjbolles.fakes.EconomyWrapperImpl;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFactory;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class AdminMarketTest {
     
@@ -30,12 +38,15 @@ public class AdminMarketTest {
     protected Logger logger;
     protected File workingDir;
     protected HashMap<String, Double> accounts;
+    protected Config config;
+    protected Player player;
+    protected PlayerInventory inventory;
     
     protected void preparePluginMock() {      
-        // Build plugin
-        plugin = mock(AdminMarket.class);
+
         accounts = new HashMap<String, Double>();
         economy = new EconomyWrapperImpl(accounts);
+        config = new Config();
         
         // Create directories
         workingDir = new File(System.getProperty("user.dir") + File.separator + "plugins");
@@ -43,6 +54,14 @@ public class AdminMarketTest {
             workingDir.mkdir();
         }
         AdminMarket.createDirectory();
+
+        // Mocks
+        plugin = mock(AdminMarket.class);
+        Server mockedServer = mock(Server.class);
+        ItemFactory mockedFactory = mock(ItemFactory.class);
+        ItemMeta mockedMeta = mock(ItemMeta.class);
+        player = mock(Player.class);
+        inventory = mock(PlayerInventory.class);
         
         // Stubs
         when(plugin.getEconomy()).thenReturn(economy);
@@ -50,9 +69,19 @@ public class AdminMarketTest {
         
         lm = new ListingManager(plugin);
         when(plugin.getListingManager()).thenReturn(lm);
-        
+
+        when(plugin.getPluginConfig()).thenReturn(config);
         tm = new TransactionManager(plugin);
+
         when(plugin.getTransactionManager()).thenReturn(tm);
+        when(mockedServer.getItemFactory()).thenReturn(mockedFactory);
+        when(mockedServer.isPrimaryThread()).thenReturn(true);
+        when(mockedFactory.getItemMeta(any(Material.class))).thenReturn(mockedMeta);
+
+        when(player.getName()).thenReturn("ANY_PLAYER");
+        when(player.getInventory()).thenReturn(inventory);
+
+        setStaticField(Bukkit.class, "server", mockedServer);
     }
     
     protected boolean deleteDirectory(File directory) {
@@ -70,5 +99,15 @@ public class AdminMarketTest {
             }
         }
         return(directory.delete());
+    }
+
+    private static void setStaticField(Class<?> parent, String name, Object value) {
+        try {
+            Field field = parent.getDeclaredField(name);
+            field.setAccessible(true);
+            field.set(null, value);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot set static field " + name + ".", e);
+        }
     }
 }

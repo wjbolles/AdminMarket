@@ -8,18 +8,26 @@
 
 package com.wjbolles.eco;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
 import com.wjbolles.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -41,18 +49,12 @@ public class TransactionManagerTest extends AdminMarketTest {
     @Test
     public void testSellHandInfiniteListing() throws Exception {
         // Arrange
-        // Economic stuff...
-        Config config = new Config();
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
-        ItemListing listing = new ItemListing(stack, true, config);
+        ItemListing listing = new ItemListing(stack, true, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
         plugin.getListingManager().addListing(stack, listing);
-        
-        // Player stuff...
-        Player player = mock(Player.class);     
-        when(player.getName()).thenReturn("ANY_PLAYER");
-        when(player.getItemInHand()).thenReturn(stack);
-        
+        when(inventory.getItemInMainHand()).thenReturn(stack);
+
         // Act
         tm.sellHand(player);
         
@@ -76,11 +78,8 @@ public class TransactionManagerTest extends AdminMarketTest {
         listing.setInventory(1000);
         listing.setEquilibrium(1000);
         plugin.getListingManager().addListing(stack, listing);
-        
-        // Player stuff...
-        Player player = mock(Player.class);     
-        when(player.getName()).thenReturn("ANY_PLAYER");
-        when(player.getItemInHand()).thenReturn(stack);
+
+        when(inventory.getItemInMainHand()).thenReturn(stack);
         
         // Act
         tm.sellHand(player);
@@ -102,11 +101,8 @@ public class TransactionManagerTest extends AdminMarketTest {
         ItemListing listing = new ItemListing(stack, false, config);
         listing.setBasePrice(10.0);
         plugin.getListingManager().addListing(stack, listing);
-        
-        // Player stuff...
-        Player player = mock(Player.class);     
-        when(player.getName()).thenReturn("ANY_PLAYER");
-        when(player.getItemInHand()).thenReturn(stack);
+
+        when(inventory.getItemInMainHand()).thenReturn(stack);
         
         // Act
         tm.sellHand(player);
@@ -124,4 +120,5 @@ public class TransactionManagerTest extends AdminMarketTest {
         // Delete the ~/plugins directory for the next test
         deleteDirectory(workingDir);
     }
+
 }
