@@ -1,0 +1,11 @@
+name: AdminMarket
+main: AdminMarket
+version: 0.1
+depend: [Vault]
+commands:
+   shop:
+        description: Shop Commands
+        usage: /<command> [help|buy|sell|list] [args]
+   shopop:
+        description: All Shop Commands
+        usage: /<command> [add|inventory] [args]
