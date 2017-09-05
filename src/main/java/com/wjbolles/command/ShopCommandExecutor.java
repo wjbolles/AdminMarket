@@ -9,8 +9,7 @@
 package com.wjbolles.command;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.eco.TransactionManager;
-import com.wjbolles.eco.ListingManager;
+import com.wjbolles.eco.dao.ItemListingDao;
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.command.Command;
@@ -22,13 +21,15 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopCommandExecutor implements CommandExecutor {
     private AdminMarket plugin;
-    private ListingManager lm;
-    private TransactionManager tm;
+    private QueryCommands lm;
+    private TransactionCommands transactionCommands;
+    private ItemListingDao listingDao;
     
     public ShopCommandExecutor(AdminMarket plugin) {
         this.plugin = plugin;
         this.lm = plugin.getListingManager();
-        this.tm = plugin.getTransactionManager();
+        this.transactionCommands = plugin.getTransactionCommands();
+        this.listingDao = plugin.getListingDao();
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -55,9 +56,9 @@ public class ShopCommandExecutor implements CommandExecutor {
         }
         
         if (args[1].equalsIgnoreCase("hand")) {
-            return tm.sellHand((Player) sender);
+            return transactionCommands.sellHand((Player) sender);
         } else if (args[1].equalsIgnoreCase("all")) {
-            return tm.sellAll((Player) sender);
+            return transactionCommands.sellAll((Player) sender);
         } else {
             ItemStack stack = CommandUtil.parseItemStack(args[1]);
             int amount;
@@ -74,7 +75,7 @@ public class ShopCommandExecutor implements CommandExecutor {
                 return false;
             }
             
-            return tm.sellItem((Player) sender, stack, amount);
+            return transactionCommands.sellItem((Player) sender, stack, amount);
         }
     }
 
@@ -99,6 +100,6 @@ public class ShopCommandExecutor implements CommandExecutor {
             return false;
         }
         
-        return tm.buyItems((Player) sender, stack, amount);
+        return transactionCommands.buyItems((Player) sender, stack, amount);
     }
 }

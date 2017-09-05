@@ -15,12 +15,11 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import com.wjbolles.eco.EconomyWrapper;
-import com.wjbolles.eco.ListingManager;
-import com.wjbolles.eco.TransactionManager;
+import com.wjbolles.command.QueryCommands;
+import com.wjbolles.command.TransactionCommands;
+import com.wjbolles.eco.economy.EconomyWrapper;
 
 import com.wjbolles.fakes.EconomyWrapperImpl;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -33,8 +32,8 @@ public class AdminMarketTest {
     // Plugin mock fields
     protected AdminMarket plugin;
     protected EconomyWrapper economy;
-    protected TransactionManager tm;
-    protected ListingManager lm;
+    protected TransactionCommands tm;
+    protected QueryCommands lm;
     protected Logger logger;
     protected File workingDir;
     protected HashMap<String, Double> accounts;
@@ -67,13 +66,13 @@ public class AdminMarketTest {
         when(plugin.getEconomy()).thenReturn(economy);
         when(plugin.getLog()).thenReturn(logger);
         
-        lm = new ListingManager(plugin);
+        lm = new QueryCommands(plugin);
         when(plugin.getListingManager()).thenReturn(lm);
 
         when(plugin.getPluginConfig()).thenReturn(config);
-        tm = new TransactionManager(plugin);
+        tm = new TransactionCommands(plugin);
 
-        when(plugin.getTransactionManager()).thenReturn(tm);
+        when(plugin.getTransactionCommands()).thenReturn(tm);
         when(mockedServer.getItemFactory()).thenReturn(mockedFactory);
         when(mockedServer.isPrimaryThread()).thenReturn(true);
         when(mockedFactory.getItemMeta(any(Material.class))).thenReturn(mockedMeta);

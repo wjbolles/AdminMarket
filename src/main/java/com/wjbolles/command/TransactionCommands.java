@@ -6,41 +6,50 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco;
+package com.wjbolles.command;
 
 import java.text.DecimalFormat;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarket;
 import com.wjbolles.Config;
-import com.wjbolles.command.CommandUtil;
+import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.model.ItemListing;
+import com.wjbolles.eco.economy.EconomyWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
 
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class TransactionManager {
-    private AdminMarket plugin;
+public class TransactionCommands {
     private Config config;
-    private ListingManager lm;
+    private QueryCommands lm;
     private Logger log;
     private final DecimalFormat df = new DecimalFormat("#.00");
+    private ItemListingDao listingDao;
+    private EconomyWrapper economyWrapper;
+    private Server server;
 
-    public TransactionManager (AdminMarket plugin) {
-        this.plugin = plugin;
-        config = plugin.getPluginConfig();
-        lm = plugin.getListingManager();
-        log = plugin.getLog();
-        df.setGroupingUsed(true);
-        df.setGroupingSize(3);
+    public TransactionCommands(AdminMarket plugin) {
+        this.config = plugin.getPluginConfig();
+        this.lm = plugin.getListingManager();
+        this.log = plugin.getLog();
+        this.listingDao = plugin.getListingDao();
+        this.economyWrapper = plugin.getEconomyWrapper();
+        this.server = plugin.getServer();
+
+        this.df.setGroupingUsed(true);
+        this.df.setGroupingSize(3);
     }
 
     // Note: This stack should have an amount of 1.
     public boolean buyItems(Player player, ItemStack stack, int amount) {
-        ItemListing listing = lm.getListing(stack);
+
+        ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
@@ -52,7 +61,7 @@ public class TransactionManager {
             return true;
         }
 
-        double playerBalance = plugin.getEconomy().getBalance(player);
+        double playerBalance = economyWrapper.getBalance(player);
         if (playerBalance < listing.getTotalBuyPrice(amount)) {
             player.sendMessage(ChatColor.RED + "You cannot afford this item.");
             return true;
@@ -89,9 +98,9 @@ public class TransactionManager {
         if (!listing.isInfinite()) {
             listing.removeInventory(amountPurchased);
         }
-        
-        plugin.getEconomy().withdraw(player, totalCost);
-        plugin.getEconomy().deposit(config.getTreasuryAccount(), totalCost);
+
+        economyWrapper.withdraw(player, totalCost);
+        economyWrapper.deposit(config.getTreasuryAccount(), totalCost);
         
         player.sendMessage(
             "Purchased: " + amountPurchased + " for: "
@@ -102,7 +111,8 @@ public class TransactionManager {
         if (!listing.isInfinite()) {
             notifyPriceChange(stack, originalPrice, listing.getBuyPrice());
         }
-        
+
+        listingDao.updateItemListing(listing);
         return true;
     }
 
@@ -110,14 +120,14 @@ public class TransactionManager {
         ItemStack hand = player.getInventory().getItemInMainHand();
         ItemStack stack = new ItemStack(hand.getType(), 1, hand.getDurability());
 
-        ItemListing listing = lm.getListing(stack);
+        ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
             player.sendMessage("This item is not in the shop.");
             return true;
         }
 
-        double serverBalance = plugin.getEconomy().getBalance(config.getTreasuryAccount());
+        double serverBalance = economyWrapper.getBalance(config.getTreasuryAccount());
         double totalCost = listing.getTotalSellPrice(hand.getAmount());
         double originalPrice = listing.getSellPrice();
         
@@ -126,13 +136,13 @@ public class TransactionManager {
                 player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
                 return true;
             } else {
-                plugin.getEconomy().withdraw(config.getTreasuryAccount(), totalCost);
+                economyWrapper.withdraw(config.getTreasuryAccount(), totalCost);
             }
 
             listing.addInventory(hand.getAmount());
         }
 
-        plugin.getEconomy().deposit(player, totalCost);
+        economyWrapper.deposit(player, totalCost);
         
         // Clear hand
         player.getInventory().setItemInMainHand(null);
@@ -141,7 +151,7 @@ public class TransactionManager {
         if (!listing.isInfinite()) {
             notifyPriceChange(stack, originalPrice, listing.getSellPrice());
         }
-        
+        listingDao.updateItemListing(listing);
         return true;
     }
 
@@ -158,7 +168,7 @@ public class TransactionManager {
             msg = label + " price change! " + ChatColor.GREEN + "+" + df.format(difference);
         }
         if(difference > 0.1) {
-            plugin.getServer().broadcastMessage(msg);
+            server.broadcastMessage(msg);
         }
     }
 
@@ -167,7 +177,7 @@ public class TransactionManager {
         try {
             ItemListing listing = new ItemListing(stack, isInfinite, config);
             listing.setBasePrice(basePrice);
-            lm.addListing(stack, listing);
+            listingDao.insertItemListing(listing);
         } catch (Exception e) {
             return false;
         }
@@ -187,10 +197,11 @@ public class TransactionManager {
                 continue;
             }
             
-            double serverBalance = plugin.getEconomy().getBalance(config.getTreasuryAccount());
+            double serverBalance = economyWrapper.getBalance(config.getTreasuryAccount());
             
             // The key for this assumes the stack has an amount of 1
-            ItemListing listing = lm.getListing(new ItemStack(stack.getType(), 1, stack.getDurability()));
+            // TODO: probably should enforce that requirement with another method
+            ItemListing listing = listingDao.findItemListing(new ItemStack(stack.getType(), 1, stack.getDurability()));
             
             if (listing == null || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
                 continue;
@@ -203,7 +214,8 @@ public class TransactionManager {
                     player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
                     break;
                 } else {
-                    plugin.getEconomy().withdraw("towny-server", subTotal);
+                    //TODO remove this hardcode
+                    economyWrapper.withdraw("towny-server", subTotal);
                 }
 
                 listing.addInventory(stack.getAmount());
@@ -212,22 +224,24 @@ public class TransactionManager {
             // Delete item from inventory slot
             inventory.setItem(i, null);
             totalSold += subTotal;
+            listingDao.updateItemListing(listing);
         }
 
-        plugin.getEconomy().deposit(player, totalSold);
+        economyWrapper.deposit(player, totalSold);
         player.sendMessage("Sold for: " + ChatColor.GREEN + "+$" + df.format(totalSold));
+
         return true;
     }
 
     public boolean sellItem(Player player, ItemStack stack, int amount) {
-        ItemListing listing = lm.getListing(stack);
+        ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
             return true;
         }
 
-        double serverBalance = plugin.getEconomy().getBalance(config.getTreasuryAccount());
+        double serverBalance = economyWrapper.getBalance(config.getTreasuryAccount());
 
         // TODO: Find out how much the server CAN afford if possible
         if (!listing.isInfinite()) {
@@ -260,9 +274,9 @@ public class TransactionManager {
         
         double totalSold = listing.getTotalSellPrice(amountSold);
 
-        plugin.getEconomy().deposit(player, totalSold);
+        economyWrapper.deposit(player, totalSold);
         if (!listing.isInfinite()) {
-            plugin.getEconomy().withdraw(config.getTreasuryAccount(), totalSold);
+            economyWrapper.withdraw(config.getTreasuryAccount(), totalSold);
         }
         
         player.sendMessage("Sold: " + amountSold + " for: "

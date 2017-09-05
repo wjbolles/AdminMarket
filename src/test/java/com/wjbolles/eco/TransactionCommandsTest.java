@@ -15,19 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
 import com.wjbolles.Config;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -35,11 +27,11 @@ import org.testng.annotations.Test;
 
 import com.wjbolles.AdminMarketTest;
 
-public class TransactionManagerTest extends AdminMarketTest {
+public class TransactionCommandsTest extends AdminMarketTest {
     
     @BeforeMethod
     public void setup() {
-        logger = Logger.getLogger(TransactionManagerTest.class.getName());
+        logger = Logger.getLogger(TransactionCommandsTest.class.getName());
         preparePluginMock();
         
         accounts.put("towny-server", 10000.0);

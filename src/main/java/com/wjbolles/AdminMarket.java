@@ -11,35 +11,41 @@ package com.wjbolles;
 import java.io.File;
 import java.util.logging.Logger;
 
+import com.wjbolles.command.QueryCommands;
 import com.wjbolles.command.ShopOpCommandExecutor;
+import com.wjbolles.command.TransactionCommands;
+import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.dao.ItemListingYamlDao;
+import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.command.ShopCommandExecutor;
-import com.wjbolles.eco.EconomyWrapper;
-import com.wjbolles.eco.ListingManager;
-import com.wjbolles.eco.TransactionManager;
-import com.wjbolles.eco.impl.VaultWrapper;
+import com.wjbolles.eco.economy.VaultWrapperImpl;
 import com.wjbolles.tools.PreloadedAliasesManager;
 
 public class AdminMarket extends JavaPlugin {
     
     private EconomyWrapper economy;
-    private TransactionManager transactionManager;
-    private ListingManager listingManager;
+    private TransactionCommands transactionCommands;
+    private QueryCommands listingManager;
     private Config config;
+    private ItemListingDao listingDao;
     
     @Override
     public void onEnable() {
         createDirectory();
 
-        economy = new VaultWrapper(this);
+        economy = new VaultWrapperImpl(this);
         config = new Config();
         
         PreloadedAliasesManager.initialize(this);
-        listingManager = new ListingManager(this);
-        transactionManager = new TransactionManager(this);
-        
+        listingManager = new QueryCommands(this);
+        transactionCommands = new TransactionCommands(this);
+
+        listingDao = new ItemListingYamlDao(this);
+        listingDao.loadItems();
+
         setupCommands();
     }
 
@@ -65,23 +71,24 @@ public class AdminMarket extends JavaPlugin {
         // TODO Insert logic to be performed when the plugin is disabled
     }
     
-    public EconomyWrapper getEconomy() {
+    public EconomyWrapper getEconomyWrapper() {
         return economy;
     }
     
-    public ListingManager getListingManager() {
+    public QueryCommands getListingManager() {
         return listingManager;
     }
     
-    public TransactionManager getTransactionManager() {
-        return transactionManager;
+    public TransactionCommands getTransactionCommands() {
+        return transactionCommands;
     }
 
     public Logger getLog() {
         return super.getLogger();
     }
-    
-    public Config getPluginConfig() {
-        return config;
-    }
+
+    public ItemListingDao getListingDao(){return listingDao;}
+
+    public Config getPluginConfig() {return config;}
+
 }

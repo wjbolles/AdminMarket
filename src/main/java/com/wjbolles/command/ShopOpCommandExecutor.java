@@ -9,10 +9,10 @@
 package com.wjbolles.command;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.eco.ItemListing;
-import com.wjbolles.eco.ListingManager;
-import com.wjbolles.eco.TransactionManager;
 
+import com.wjbolles.eco.model.ItemListing;
+import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.dao.ItemListingYamlDao;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,13 +21,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopOpCommandExecutor implements CommandExecutor {
     private AdminMarket plugin;
-    private ListingManager lm;
-    private TransactionManager tm;
-    
+    private QueryCommands lm;
+    private TransactionCommands tm;
+    private ItemListingDao listingDao;
     public ShopOpCommandExecutor(AdminMarket plugin) {
         this.plugin = plugin;
         this.lm = plugin.getListingManager();
-        this.tm = plugin.getTransactionManager();
+        this.tm = plugin.getTransactionCommands();
+        this.listingDao = new ItemListingYamlDao(plugin);
     }
     
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -69,8 +70,9 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Parameter not recognized!");
             return false;
         }
-        ItemListing listing = lm.getListing(stack);
+        ItemListing listing = listingDao.findItemListing(stack);
         listing.setEquilibrium(equilibrium);
+        listingDao.updateItemListing(listing);
         return true;
     }
     private boolean helpCommand(CommandSender sender, String[] args) {
@@ -95,8 +97,9 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Parameter not recognized!");
             return false;
         }
-        ItemListing listing = lm.getListing(stack);
+        ItemListing listing = listingDao.findItemListing(stack);
         listing.setBasePrice(basePrice);
+        listingDao.updateItemListing(listing);
         return true;
     }
     
@@ -118,8 +121,9 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Parameter not recognized!");
             return false;
         }
-        ItemListing listing = lm.getListing(stack);
+        ItemListing listing = listingDao.findItemListing(stack);
         listing.setInventory(inventory);
+        listingDao.updateItemListing(listing);
         return true;
     }
 

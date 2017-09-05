@@ -37,4 +37,5 @@ public class CommandUtil {
     public static boolean safeDoubleEqualsZero(double d) {
         return (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(d)) == 0);
     }
+
 }

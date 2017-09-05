@@ -6,22 +6,21 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco.impl;
+package com.wjbolles.eco.economy;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.eco.EconomyWrapper;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class VaultWrapper implements EconomyWrapper {
+public class VaultWrapperImpl implements EconomyWrapper {
     
     private static AdminMarket plugin;
     
     private Economy economy;
     
-    public VaultWrapper(AdminMarket plugin) {
+    public VaultWrapperImpl(AdminMarket plugin) {
         this.plugin = plugin;
         setupEconomy();
     }

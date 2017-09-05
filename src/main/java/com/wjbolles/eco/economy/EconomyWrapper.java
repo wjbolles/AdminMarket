@@ -6,7 +6,7 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco;
+package com.wjbolles.eco.economy;
 
 import org.bukkit.OfflinePlayer;
 

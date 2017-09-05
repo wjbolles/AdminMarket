@@ -6,9 +6,8 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco;
+package com.wjbolles.command;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +15,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.command.CommandUtil;
+import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.dao.ItemListingYamlDao;
+import com.wjbolles.eco.model.ItemListing;
 import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
 
@@ -27,51 +28,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 import org.bukkit.util.ChatPaginator.ChatPage;
 
-public class ListingManager {
+public class QueryCommands {
     private AdminMarket plugin;
     private Logger log;
     private DecimalFormat df = new DecimalFormat("#.00");
     private HashMap<String, ItemListing> listings = new HashMap<String, ItemListing>();
-    
-    public ListingManager(AdminMarket plugin) {
+    private ItemListingDao listingDao;
+    public QueryCommands(AdminMarket plugin) {
         this.plugin = plugin;
         this.log = plugin.getLog();
         log.info("Loading items...");
-        loadItems();
+        listingDao = new ItemListingYamlDao(plugin);
+        listingDao.loadItems();
         df.setGroupingUsed(true);
         df.setGroupingSize(3);
-    }
-    
-    private void loadItems() {
-        File itemsDir = new File(Consts.PLUGIN_ITEMS_DIR);
-        File[] items = itemsDir.listFiles();
-        
-        for(File item : items) {
-            ItemListing listing = null;
-            try {
-                listing = new ItemListing(item, plugin.getPluginConfig());
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            ItemStack stack = new ItemStack(listing.getStack().getType(), 1, listing.getStack().getDurability());
-            listings.put(generateStackKey(stack), listing);
-        }
-    }
-    
-    public ItemListing getListing(ItemStack key) {
-        if (key.getAmount() != 1) {
-            throw new IllegalArgumentException();
-        }
-        return listings.get(generateStackKey(key));
-    }
-
-    public void addListing(ItemStack stack, ItemListing listing) {
-        listings.put(generateStackKey(stack), listing);
-    }
-    
-    public String generateStackKey(ItemStack stack) {
-        return stack.getType()+":"+stack.getDurability();
     }
 
     public boolean listCommand(CommandSender sender, String[] args) {
@@ -149,8 +119,8 @@ public class ListingManager {
             sender.sendMessage(ChatColor.RED + "Item not recognized!");
             return false;
         }
-        
-        ItemListing listing = plugin.getListingManager().getListing(stack);
+
+        ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null) {
             sender.sendMessage(ChatColor.RED + "This item is not in the shop.");

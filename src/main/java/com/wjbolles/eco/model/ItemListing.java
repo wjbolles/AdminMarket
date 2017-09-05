@@ -6,7 +6,7 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco;
+package com.wjbolles.eco.model;
 
 import java.io.File;
 
@@ -25,8 +25,6 @@ public class ItemListing {
     private double basePrice;
     private double valueAddedTax;
     private int equilibrium;
-    private YamlConfiguration yamlConf = new YamlConfiguration();
-    private File itemConf;
     private Config config;
 
     public ItemListing(ItemStack stack, boolean isInfinite, Config config) throws Exception {
@@ -37,56 +35,14 @@ public class ItemListing {
         this.valueAddedTax = 0;
         this.equilibrium = 1000;
         this.config = config;
-
-        initNewConf();
-    }
-    public ItemListing(File itemConf, Config config) throws Exception {
-        this.itemConf = itemConf;
-        yamlConf.load(itemConf);
-
-        this.stack = new ItemStack(Material.getMaterial(yamlConf.getString("material")), 1, (short) yamlConf.getInt("durability"));
-        this.isInfinite = yamlConf.getBoolean("isInfinite");
-        this.basePrice = yamlConf.getDouble("basePrice");
-        this.inventory = yamlConf.getInt("inventory");
-        this.equilibrium = yamlConf.getInt("equilibrium");
-        this.valueAddedTax = yamlConf.getDouble("valueAddedTax");
-        this.config = config;
-    }
-    
-    public YamlConfiguration getYamlConf() {
-        return yamlConf;
-    }
-    
-    public void setYamlConf(YamlConfiguration yamlConf) {
-        this.yamlConf = yamlConf;
     }
 
-    public File getItemConf() {
-        return itemConf;
+    public double getValueAddedTax() {
+        return valueAddedTax;
     }
 
-    public void setItemConf(File itemConf) {
-        this.itemConf = itemConf;
-    }
-    
-    private void initNewConf() throws Exception {
-        itemConf = new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
-                this.stack.getType()+"-"+
-                this.stack.getDurability()+".yml");
-        
-        if(itemConf.exists()) {
-            throw new IllegalStateException();
-        }
-        itemConf.createNewFile();
-        
-        yamlConf.load(itemConf);
-        yamlConf.set("material", stack.getType().toString());
-        yamlConf.set("durability", stack.getDurability());
-        yamlConf.set("isInfinite", Boolean.valueOf(this.isInfinite));
-        yamlConf.set("inventory", Integer.valueOf(this.inventory));
-        yamlConf.set("equilibrium", Integer.valueOf(this.equilibrium));
-        yamlConf.set("basePrice",  Double.valueOf(this.basePrice));
-        yamlConf.save(itemConf);    
+    public void setValueAddedTax(double valueAddedTax) {
+        this.valueAddedTax = valueAddedTax;
     }
 
     public boolean buyItem(int amount) {
@@ -183,11 +139,7 @@ public class ItemListing {
     public void setEquilibrium(int equilibrium) {
         this.equilibrium = equilibrium;
     }
-    
-    public void deleteConf() {
-        itemConf.delete();
-    }
-    
+
     public double getTotalSellPrice(int amount) {
         if (isInfinite) {
             return getSellPrice() * amount;

@@ -14,7 +14,7 @@ import static org.testng.Assert.*;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarketTest;
-import com.wjbolles.eco.TransactionManagerTest;
+import com.wjbolles.eco.TransactionCommandsTest;
 import com.wjbolles.fakes.InventoryFake;
 
 import org.bukkit.Material;
@@ -31,7 +31,7 @@ public class InventoryFakeTest extends AdminMarketTest {
     
     @BeforeMethod
     public void setup() { 
-        logger = Logger.getLogger(TransactionManagerTest.class.getName());
+        logger = Logger.getLogger(TransactionCommandsTest.class.getName());
         preparePluginMock();
         
         player = mock(Player.class);
