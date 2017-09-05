@@ -19,16 +19,16 @@ import org.bukkit.inventory.ItemStack;
 
 public class ItemListing {
     
+    private final ItemStack stack;
     private boolean isInfinite;
     private int inventory;
-    private final ItemStack stack;
     private double basePrice;
     private double valueAddedTax;
     private int equilibrium;
-    private YamlConfiguration itemcfg = new YamlConfiguration();
+    private YamlConfiguration yamlConf = new YamlConfiguration();
     private File itemConf;
     private Config config;
-    
+
     public ItemListing(ItemStack stack, boolean isInfinite, Config config) throws Exception {
         this.stack = stack;
         this.isInfinite = isInfinite;
@@ -37,21 +37,36 @@ public class ItemListing {
         this.valueAddedTax = 0;
         this.equilibrium = 1000;
         this.config = config;
-        
+
         initNewConf();
     }
-    
     public ItemListing(File itemConf, Config config) throws Exception {
         this.itemConf = itemConf;
-        itemcfg.load(itemConf);
-        
-        this.stack = new ItemStack(Material.getMaterial(itemcfg.getString("material")), 1, (short) itemcfg.getInt("durability"));
-        this.isInfinite = itemcfg.getBoolean("isInfinite");
-        this.basePrice = itemcfg.getDouble("basePrice");
-        this.inventory = itemcfg.getInt("inventory");
-        this.equilibrium = itemcfg.getInt("equilibrium");
-        this.valueAddedTax = itemcfg.getDouble("valueAddedTax");
+        yamlConf.load(itemConf);
+
+        this.stack = new ItemStack(Material.getMaterial(yamlConf.getString("material")), 1, (short) yamlConf.getInt("durability"));
+        this.isInfinite = yamlConf.getBoolean("isInfinite");
+        this.basePrice = yamlConf.getDouble("basePrice");
+        this.inventory = yamlConf.getInt("inventory");
+        this.equilibrium = yamlConf.getInt("equilibrium");
+        this.valueAddedTax = yamlConf.getDouble("valueAddedTax");
         this.config = config;
+    }
+    
+    public YamlConfiguration getYamlConf() {
+        return yamlConf;
+    }
+    
+    public void setYamlConf(YamlConfiguration yamlConf) {
+        this.yamlConf = yamlConf;
+    }
+
+    public File getItemConf() {
+        return itemConf;
+    }
+
+    public void setItemConf(File itemConf) {
+        this.itemConf = itemConf;
     }
     
     private void initNewConf() throws Exception {
@@ -64,14 +79,14 @@ public class ItemListing {
         }
         itemConf.createNewFile();
         
-        itemcfg.load(itemConf);
-        itemcfg.set("material", stack.getType().toString());
-        itemcfg.set("durability", stack.getDurability());
-        itemcfg.set("isInfinite", Boolean.valueOf(this.isInfinite));
-        itemcfg.set("inventory", Integer.valueOf(this.inventory));
-        itemcfg.set("equilibrium", Integer.valueOf(this.equilibrium));
-        itemcfg.set("basePrice",  Double.valueOf(this.basePrice));
-        itemcfg.save(itemConf);    
+        yamlConf.load(itemConf);
+        yamlConf.set("material", stack.getType().toString());
+        yamlConf.set("durability", stack.getDurability());
+        yamlConf.set("isInfinite", Boolean.valueOf(this.isInfinite));
+        yamlConf.set("inventory", Integer.valueOf(this.inventory));
+        yamlConf.set("equilibrium", Integer.valueOf(this.equilibrium));
+        yamlConf.set("basePrice",  Double.valueOf(this.basePrice));
+        yamlConf.save(itemConf);    
     }
 
     public boolean buyItem(int amount) {
@@ -79,14 +94,6 @@ public class ItemListing {
             return true;
         } else if (amount < inventory) {
             inventory -= amount;
-            
-            try {
-                itemcfg.load(itemConf);
-                itemcfg.set("inventory", Integer.valueOf(this.inventory));
-                itemcfg.save(itemConf);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             return true;
         }
         
@@ -99,48 +106,31 @@ public class ItemListing {
 
     public void setInfinite(boolean isInfinite) {
         this.isInfinite = isInfinite;
-        try {
-            itemcfg.load(itemConf);
-            itemcfg.set("isInfinite", Boolean.valueOf(this.isInfinite));
-            itemcfg.save(itemConf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public int getInventory() {
         return inventory;
     }
 
-    public void addInventory(int inventory) {
-        this.inventory += inventory;
-        try {
-            itemcfg.load(itemConf);
-            itemcfg.set("inventory", Integer.valueOf(this.inventory));
-            itemcfg.save(itemConf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void setInventory(int inventory) {
+        this.inventory = inventory;
     }
 
+    public void addInventory(int inventory) {
+        this.inventory += inventory;
+    }
+    
     public void removeInventory(int inventory) {
         if (this.inventory - inventory < 0) {
             throw new IllegalArgumentException();
         }
         this.inventory -= inventory;
-        try {
-            itemcfg.load(itemConf);
-            itemcfg.set("inventory", Integer.valueOf(this.inventory));
-            itemcfg.save(itemConf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     
     public double getSellPrice() {
         return getSellPrice(this.inventory);
     }
-    
+
     private double getSellPrice(int inventory) {
         if(config.shouldUseFloatingPrices() && !isInfinite) {
             double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/-equilibrium;
@@ -153,11 +143,11 @@ public class ItemListing {
             return basePrice;
         }
     }
-
+    
     public double getBuyPrice() {
         return getBuyPrice(this.inventory);
     }
-    
+
     private double getBuyPrice(int inventory) {
         double buyPrice = 0;
         if(config.shouldUseFloatingPrices() && !isInfinite) {
@@ -173,35 +163,17 @@ public class ItemListing {
         buyPrice = buyPrice + buyPrice * valueAddedTax;
         return buyPrice;
     }
-
-    public void setBasePrice(double basePrice) {
-        this.basePrice = basePrice;
-        try {
-            itemcfg.load(itemConf);
-            itemcfg.set("basePrice", Double.valueOf(this.basePrice));
-            itemcfg.save(itemConf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     
     public double getBasePrice() {
         return this.basePrice;
     }
     
-    public ItemStack getStack() {
-        return stack;
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
     }
 
-    public void setInventory(int inventory) {
-        this.inventory = inventory;
-        try {
-            itemcfg.load(itemConf);
-            itemcfg.set("inventory", Integer.valueOf(this.inventory));
-            itemcfg.save(itemConf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public ItemStack getStack() {
+        return stack;
     }
     
     public int getEquilibrium() {
@@ -210,13 +182,6 @@ public class ItemListing {
     
     public void setEquilibrium(int equilibrium) {
         this.equilibrium = equilibrium;
-        try {
-            itemcfg.load(itemConf);
-            itemcfg.set("equilibrium", Integer.valueOf(this.equilibrium));
-            itemcfg.save(itemConf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     
     public void deleteConf() {

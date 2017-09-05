@@ -103,7 +103,7 @@ public class ListingManager {
             if (CommandUtil.safeDoubleEqualsZero(buyPrice)) {
                 sb.append(ChatColor.WHITE + " B: n/a");
             } else {
-                if (isInfinite) {
+                if (isInfinite || plugin.getPluginConfig().shouldUseFloatingPrices() == false) {
                     sb.append(ChatColor.WHITE + " B: -$" + df.format(buyPrice));
                 } else if (buyPrice < basePrice) {
                     sb.append(ChatColor.GREEN + " B: -$" + df.format(buyPrice));

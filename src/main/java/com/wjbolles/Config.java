@@ -18,7 +18,7 @@ public class Config {
     public Config() {
         this.salesTax = 0.03; // 3%
         this.maxPercentBasePrice = 1.33; // 133% Base
-        this.useFloatingPrices = false;
+        this.useFloatingPrices = true;
         this.treasuryAccount = "towny-server";
     }
 

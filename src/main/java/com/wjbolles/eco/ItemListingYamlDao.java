@@ -2,10 +2,13 @@ package com.wjbolles.eco;
 
 import com.wjbolles.AdminMarket;
 import com.wjbolles.adminmarket.utils.Consts;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.ItemList;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -54,15 +57,38 @@ public class ItemListingYamlDao implements ItemListingDao {
         return listings.get(generateStackKey(stack));
     }
 
+    private void updateYamlConf(ItemListing listing) throws IOException, InvalidConfigurationException {
+
+        YamlConfiguration yamlConf = listing.getYamlConf();
+
+        yamlConf.load(listing.getItemConf());
+        yamlConf.set("material", listing.getStack().getType().toString());
+        yamlConf.set("durability", listing.getStack().getDurability());
+        yamlConf.set("isInfinite", listing.isInfinite());
+        yamlConf.set("inventory", listing.getInventory());
+        yamlConf.set("equilibrium", listing.getEquilibrium());
+        yamlConf.set("basePrice",  listing.getBasePrice());
+        yamlConf.save(listing.getItemConf());
+    }
+
     public boolean insertItemListing(ItemListing listing) {
+        // TODO Implement this
         return false;
     }
 
     public boolean updateItemListing(ItemListing listing) {
-        return false;
+        try {
+            updateYamlConf(listing);
+        } catch (IOException e) {
+            return false;
+        } catch (InvalidConfigurationException e) {
+            return false;
+        }
+        return true;
     }
 
     public boolean deleteItemListing(ItemListing listing) {
-        return false;
+        listing.getItemConf().delete();
+        return true;
     }
 }
