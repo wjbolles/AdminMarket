@@ -6,18 +6,18 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.fakes;
+package com.wjbolles.eco.economy;
 
 import java.util.HashMap;
 
 import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.OfflinePlayer;
 
-public class EconomyWrapperImpl implements EconomyWrapper {
+public class BasicEconomyWrapperImpl implements EconomyWrapper {
     
     private HashMap<String, Double> accounts;
     
-    public EconomyWrapperImpl (HashMap<String, Double> accounts) {
+    public BasicEconomyWrapperImpl(HashMap<String, Double> accounts) {
         this.accounts = accounts;
     }
 

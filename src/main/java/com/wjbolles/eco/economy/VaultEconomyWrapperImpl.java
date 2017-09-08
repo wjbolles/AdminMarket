@@ -14,13 +14,13 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class VaultWrapperImpl implements EconomyWrapper {
+public class VaultEconomyWrapperImpl implements EconomyWrapper {
     
     private static AdminMarket plugin;
     
     private Economy economy;
     
-    public VaultWrapperImpl(AdminMarket plugin) {
+    public VaultEconomyWrapperImpl(AdminMarket plugin) {
         this.plugin = plugin;
         setupEconomy();
     }

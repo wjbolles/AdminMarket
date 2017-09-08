@@ -25,7 +25,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.wjbolles.AdminMarketTest;
-import com.wjbolles.eco.ItemListing;
+import com.wjbolles.eco.model.ItemListing;
 
 import static org.testng.Assert.*;
 
@@ -45,7 +45,7 @@ public class ShopCommandExecutorTest extends AdminMarketTest {
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
         ItemListing listing = new ItemListing(stack, true, config);
         listing.setBasePrice(10.0);
-        plugin.getListingManager().addListing(stack, listing);
+        //plugin.getListingManager().addListing(stack, listing);
         Player player = mock(Player.class);
         
         // Act

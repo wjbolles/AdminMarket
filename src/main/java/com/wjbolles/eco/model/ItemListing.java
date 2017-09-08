@@ -18,7 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemListing {
-    
+
     private final ItemStack stack;
     private boolean isInfinite;
     private int inventory;
@@ -52,7 +52,7 @@ public class ItemListing {
             inventory -= amount;
             return true;
         }
-        
+
         return false;
     }
 
@@ -75,14 +75,14 @@ public class ItemListing {
     public void addInventory(int inventory) {
         this.inventory += inventory;
     }
-    
+
     public void removeInventory(int inventory) {
         if (this.inventory - inventory < 0) {
             throw new IllegalArgumentException();
         }
         this.inventory -= inventory;
     }
-    
+
     public double getSellPrice() {
         return getSellPrice(this.inventory);
     }
@@ -99,7 +99,7 @@ public class ItemListing {
             return basePrice;
         }
     }
-    
+
     public double getBuyPrice() {
         return getBuyPrice(this.inventory);
     }
@@ -119,11 +119,11 @@ public class ItemListing {
         buyPrice = buyPrice + buyPrice * valueAddedTax;
         return buyPrice;
     }
-    
+
     public double getBasePrice() {
         return this.basePrice;
     }
-    
+
     public void setBasePrice(double basePrice) {
         this.basePrice = basePrice;
     }
@@ -131,11 +131,11 @@ public class ItemListing {
     public ItemStack getStack() {
         return stack;
     }
-    
+
     public int getEquilibrium() {
         return this.equilibrium;
     }
-    
+
     public void setEquilibrium(int equilibrium) {
         this.equilibrium = equilibrium;
     }
@@ -144,25 +144,25 @@ public class ItemListing {
         if (isInfinite) {
             return getSellPrice() * amount;
         }
-        
+
         int inventory = this.getInventory();
-        
+
         double total = 0;
         for(int i = 0; i < amount; i++) {
             total += getSellPrice(inventory);
             inventory++;
         }
-        
+
         return total;
     }
-    
+
     public double getTotalBuyPrice(int amount) {
         if (isInfinite) {
             return getBuyPrice() * amount;
         }
-        
+
         int inventory = this.getInventory();
-        
+
         double total = 0;
         for(int i = 0; i < amount; i++) {
             if (inventory == 0) {
@@ -171,7 +171,7 @@ public class ItemListing {
             total += getBuyPrice(inventory);
             inventory--;
         }
-        
+
         return total;
     }
 }

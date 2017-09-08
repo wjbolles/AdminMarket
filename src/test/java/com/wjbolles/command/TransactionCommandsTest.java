@@ -6,7 +6,7 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco;
+package com.wjbolles.command;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -18,6 +18,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.logging.Logger;
 
 import com.wjbolles.Config;
+import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +45,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
         ItemListing listing = new ItemListing(stack, true, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
-        plugin.getListingManager().addListing(stack, listing);
+        //plugin.getListingManager().addListing(stack, listing);
         when(inventory.getItemInMainHand()).thenReturn(stack);
 
         // Act
@@ -69,7 +70,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         listing.setBasePrice(10.0);
         listing.setInventory(1000);
         listing.setEquilibrium(1000);
-        plugin.getListingManager().addListing(stack, listing);
+        //plugin.getListingManager().addListing(stack, listing);
 
         when(inventory.getItemInMainHand()).thenReturn(stack);
         
@@ -92,7 +93,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         ItemStack stack = new ItemStack(Material.STONE, 64, (short) 1);
         ItemListing listing = new ItemListing(stack, false, config);
         listing.setBasePrice(10.0);
-        plugin.getListingManager().addListing(stack, listing);
+        //plugin.getListingManager().addListing(stack, listing);
 
         when(inventory.getItemInMainHand()).thenReturn(stack);
         

@@ -95,6 +95,12 @@ public class ItemListingYamlDao implements ItemListingDao {
 
     public boolean insertItemListing(ItemListing listing) {
         listings.put(generateStackKey(listing.getStack()), listing);
+        try {
+            initNewConf(listing);
+        } catch (Exception e) {
+            // TODO log
+            return false;
+        }
         return true;
     }
 
@@ -114,7 +120,7 @@ public class ItemListingYamlDao implements ItemListingDao {
         return true;
     }
 
-    private File getListingConfFile(ItemListing listing){
+    public File getListingConfFile(ItemListing listing){
         File itemConf = new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
                 listing.getStack().getType()+"-"+
                 listing.getStack().getDurability()+".yml");

@@ -21,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.command.ShopCommandExecutor;
-import com.wjbolles.eco.economy.VaultWrapperImpl;
+import com.wjbolles.eco.economy.VaultEconomyWrapperImpl;
 import com.wjbolles.tools.PreloadedAliasesManager;
 
 public class AdminMarket extends JavaPlugin {
@@ -36,7 +36,7 @@ public class AdminMarket extends JavaPlugin {
     public void onEnable() {
         createDirectory();
 
-        economy = new VaultWrapperImpl(this);
+        economy = new VaultEconomyWrapperImpl(this);
         config = new Config();
         
         PreloadedAliasesManager.initialize(this);

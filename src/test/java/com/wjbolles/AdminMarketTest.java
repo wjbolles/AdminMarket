@@ -19,13 +19,14 @@ import com.wjbolles.command.QueryCommands;
 import com.wjbolles.command.TransactionCommands;
 import com.wjbolles.eco.economy.EconomyWrapper;
 
-import com.wjbolles.fakes.EconomyWrapperImpl;
+import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.testng.annotations.AfterMethod;
 
 public class AdminMarketTest {
     
@@ -44,7 +45,7 @@ public class AdminMarketTest {
     protected void preparePluginMock() {      
 
         accounts = new HashMap<String, Double>();
-        economy = new EconomyWrapperImpl(accounts);
+        economy = new BasicEconomyWrapperImpl(accounts);
         config = new Config();
         
         // Create directories
@@ -63,7 +64,7 @@ public class AdminMarketTest {
         inventory = mock(PlayerInventory.class);
         
         // Stubs
-        when(plugin.getEconomy()).thenReturn(economy);
+        when(plugin.getEconomyWrapper()).thenReturn(economy);
         when(plugin.getLog()).thenReturn(logger);
         
         lm = new QueryCommands(plugin);
@@ -98,6 +99,12 @@ public class AdminMarketTest {
             }
         }
         return(directory.delete());
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        // Delete the ~/plugins directory for the next test
+        deleteDirectory(workingDir);
     }
 
     private static void setStaticField(Class<?> parent, String name, Object value) {

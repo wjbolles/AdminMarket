@@ -6,7 +6,7 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.eco.impl;
+package com.wjbolles.fakes;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
@@ -14,8 +14,7 @@ import static org.testng.Assert.*;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarketTest;
-import com.wjbolles.eco.TransactionCommandsTest;
-import com.wjbolles.fakes.InventoryFake;
+import com.wjbolles.command.TransactionCommandsTest;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
