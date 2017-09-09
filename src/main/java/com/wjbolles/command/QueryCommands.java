@@ -31,7 +31,6 @@ public class QueryCommands {
     private AdminMarket plugin;
     private Logger log;
     private DecimalFormat df = new DecimalFormat("#.00");
-    private HashMap<String, ItemListing> listings = new HashMap<String, ItemListing>();
     private ItemListingDao listingDao;
     public QueryCommands(AdminMarket plugin) {
         this.plugin = plugin;
@@ -39,6 +38,7 @@ public class QueryCommands {
         log.info("Loading items...");
         listingDao = new ItemListingYamlDao(plugin);
         listingDao.loadItems();
+        listingDao.getAllListings();
         df.setGroupingUsed(true);
         df.setGroupingSize(3);
     }
@@ -57,6 +57,7 @@ public class QueryCommands {
         }
         
         StringBuilder sb = new StringBuilder();
+        HashMap<String, ItemListing> listings = listingDao.getAllListings();
         List<String> keys = new ArrayList<String>(listings.keySet());
         
         for(String key : keys) {

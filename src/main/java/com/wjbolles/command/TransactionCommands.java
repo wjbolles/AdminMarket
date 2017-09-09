@@ -177,6 +177,7 @@ public class TransactionCommands {
             listing.setBasePrice(basePrice);
             listingDao.insertItemListing(listing);
         } catch (Exception e) {
+            sender.sendMessage("An unexpected error has occurred.");
             e.printStackTrace();
             return false;
         }
