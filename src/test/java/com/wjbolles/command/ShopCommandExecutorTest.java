@@ -15,7 +15,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.logging.Logger;
 
-import com.wjbolles.Config;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,9 +40,8 @@ public class ShopCommandExecutorTest extends AdminMarketTest {
     public void testGetListing() throws Exception {
         // Arrange
         // Economic stuff...
-        Config config = new Config();
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
-        ItemListing listing = new ItemListing(stack, true, config);
+        ItemListing listing = new ItemListing(stack, true, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
         //plugin.getListingManager().addListing(stack, listing);
         Player player = mock(Player.class);

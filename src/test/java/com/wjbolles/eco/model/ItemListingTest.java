@@ -42,7 +42,7 @@ public class ItemListingTest extends AdminMarketTest {
     public void removeInventoryTest() throws Exception {
         // Arrange
         boolean isInfinite = false;
-        when(config.shouldUseFloatingPrices()).thenReturn(true);
+        when(config.getShouldUseFloatingPrices()).thenReturn(true);
 
         // Act
         listing = new ItemListing(stack,isInfinite,config);
@@ -57,7 +57,7 @@ public class ItemListingTest extends AdminMarketTest {
     public void getSellPriceInfiniteTest() throws Exception {
         // Arrange
         boolean isInfinite = true;
-        when(config.shouldUseFloatingPrices()).thenReturn(true);
+        when(config.getShouldUseFloatingPrices()).thenReturn(true);
 
         // Act
         listing = new ItemListing(stack,isInfinite,config);
@@ -73,7 +73,7 @@ public class ItemListingTest extends AdminMarketTest {
         // Arrange
         // Hand calculated: 13.0888
         double expectedSellPrice = 13.0888;
-        when(config.shouldUseFloatingPrices()).thenReturn(true);
+        when(config.getShouldUseFloatingPrices()).thenReturn(true);
         when(config.getMaxPercentBasePrice()).thenReturn(1.33);
 
         // Act

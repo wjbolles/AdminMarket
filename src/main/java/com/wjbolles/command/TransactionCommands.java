@@ -8,25 +8,23 @@
 
 package com.wjbolles.command;
 
-import java.text.DecimalFormat;
-import java.util.logging.Logger;
-
 import com.wjbolles.AdminMarket;
-import com.wjbolles.Config;
 import com.wjbolles.eco.dao.ItemListingDao;
-import com.wjbolles.eco.model.ItemListing;
 import com.wjbolles.eco.economy.EconomyWrapper;
+import com.wjbolles.eco.model.ItemListing;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
-
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.text.DecimalFormat;
+import java.util.logging.Logger;
+
 public class TransactionCommands {
-    private Config config;
+    private AdminMarket plugin;
     private QueryCommands lm;
     private Logger log;
     private final DecimalFormat df = new DecimalFormat("#.00");
@@ -35,7 +33,7 @@ public class TransactionCommands {
     private Server server;
 
     public TransactionCommands(AdminMarket plugin) {
-        this.config = plugin.getPluginConfig();
+        this.plugin = plugin;
         this.lm = plugin.getListingManager();
         this.log = plugin.getLog();
         this.listingDao = plugin.getListingDao();
@@ -100,7 +98,7 @@ public class TransactionCommands {
         }
 
         economyWrapper.withdraw(player, totalCost);
-        economyWrapper.deposit(config.getTreasuryAccount(), totalCost);
+        economyWrapper.deposit(plugin.getPluginConfig().getTreasuryAccount(), totalCost);
         
         player.sendMessage(
             "Purchased: " + amountPurchased + " for: "
@@ -127,7 +125,7 @@ public class TransactionCommands {
             return true;
         }
 
-        double serverBalance = economyWrapper.getBalance(config.getTreasuryAccount());
+        double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
         double totalCost = listing.getTotalSellPrice(hand.getAmount());
         double originalPrice = listing.getSellPrice();
         
@@ -136,7 +134,7 @@ public class TransactionCommands {
                 player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
                 return true;
             } else {
-                economyWrapper.withdraw(config.getTreasuryAccount(), totalCost);
+                economyWrapper.withdraw(plugin.getPluginConfig().getTreasuryAccount(), totalCost);
             }
 
             listing.addInventory(hand.getAmount());
@@ -175,10 +173,11 @@ public class TransactionCommands {
     public boolean addItems(Player sender, ItemStack stack,
             double basePrice, boolean isInfinite) {
         try {
-            ItemListing listing = new ItemListing(stack, isInfinite, config);
+            ItemListing listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
             listing.setBasePrice(basePrice);
             listingDao.insertItemListing(listing);
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -197,7 +196,7 @@ public class TransactionCommands {
                 continue;
             }
             
-            double serverBalance = economyWrapper.getBalance(config.getTreasuryAccount());
+            double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
             
             // The key for this assumes the stack has an amount of 1
             // TODO: probably should enforce that requirement with another method
@@ -241,7 +240,7 @@ public class TransactionCommands {
             return true;
         }
 
-        double serverBalance = economyWrapper.getBalance(config.getTreasuryAccount());
+        double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
 
         // TODO: Find out how much the server CAN afford if possible
         if (!listing.isInfinite()) {
@@ -276,7 +275,7 @@ public class TransactionCommands {
 
         economyWrapper.deposit(player, totalSold);
         if (!listing.isInfinite()) {
-            economyWrapper.withdraw(config.getTreasuryAccount(), totalSold);
+            economyWrapper.withdraw(plugin.getPluginConfig().getTreasuryAccount(), totalSold);
         }
         
         player.sendMessage("Sold: " + amountSold + " for: "

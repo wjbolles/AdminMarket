@@ -29,24 +29,29 @@ public class AdminMarket extends JavaPlugin {
     private EconomyWrapper economy;
     private TransactionCommands transactionCommands;
     private QueryCommands listingManager;
-    private Config config;
     private ItemListingDao listingDao;
     
     @Override
     public void onEnable() {
         createDirectory();
+        setupConfig();
 
         economy = new VaultEconomyWrapperImpl(this);
-        config = new Config();
-        
+
         PreloadedAliasesManager.initialize(this);
         listingManager = new QueryCommands(this);
+        listingDao = new ItemListingYamlDao(this);
         transactionCommands = new TransactionCommands(this);
 
         listingDao = new ItemListingYamlDao(this);
         listingDao.loadItems();
 
         setupCommands();
+    }
+
+    private void setupConfig() {
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
 
     private void setupCommands() {
@@ -68,7 +73,7 @@ public class AdminMarket extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // TODO Insert logic to be performed when the plugin is disabled
+        saveConfig();
     }
     
     public EconomyWrapper getEconomyWrapper() {
@@ -89,6 +94,7 @@ public class AdminMarket extends JavaPlugin {
 
     public ItemListingDao getListingDao(){return listingDao;}
 
-    public Config getPluginConfig() {return config;}
-
+    public Config getPluginConfig() {
+        return new Config(this);
+    }
 }

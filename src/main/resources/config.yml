@@ -1,6 +1,10 @@
+treasuryAccount: towny-server
+salesTax: 0.03
+maxPercentBasePrice: 1.33
+useFloatingPrices: false
 console-output: true
 messages:
-  msg_nope: '&cError: You do not havepermission.'
+  msg_nope: '&cError: You do not have permission.'
   msg_help_header: '&b[]----------- &6&lShop v%version% &b-----------[]'
   msg_help_help: '&3/shop help &6- Shows this help'
   msg_help_buy: '&3/shop buy <name/ID> <amount> &6- Buy an Item'

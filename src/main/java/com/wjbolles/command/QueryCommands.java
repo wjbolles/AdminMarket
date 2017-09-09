@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.model.ItemListing;
@@ -73,7 +72,7 @@ public class QueryCommands {
             if (CommandUtil.safeDoubleEqualsZero(buyPrice)) {
                 sb.append(ChatColor.WHITE + " B: n/a");
             } else {
-                if (isInfinite || plugin.getPluginConfig().shouldUseFloatingPrices() == false) {
+                if (isInfinite || !plugin.getPluginConfig().getShouldUseFloatingPrices()) {
                     sb.append(ChatColor.WHITE + " B: -$" + df.format(buyPrice));
                 } else if (buyPrice < basePrice) {
                     sb.append(ChatColor.GREEN + " B: -$" + df.format(buyPrice));

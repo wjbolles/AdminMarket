@@ -17,11 +17,11 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.logging.Logger;
 
-import com.wjbolles.Config;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -34,6 +34,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
     public void setup() {
         logger = Logger.getLogger(TransactionCommandsTest.class.getName());
         preparePluginMock();
+        when(config.getTreasuryAccount()).thenReturn("towny-server");
         
         accounts.put("towny-server", 10000.0);
         accounts.put("ANY_PLAYER", 10000.0);
@@ -45,8 +46,9 @@ public class TransactionCommandsTest extends AdminMarketTest {
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
         ItemListing listing = new ItemListing(stack, true, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
-        //plugin.getListingManager().addListing(stack, listing);
+
         when(inventory.getItemInMainHand()).thenReturn(stack);
+        when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
 
         // Act
         tm.sellHand(player);
@@ -63,17 +65,17 @@ public class TransactionCommandsTest extends AdminMarketTest {
     public void testSellHandLimitedListing() throws Exception {
         // Arrange
         // Economic stuff...
-        Config config = new Config();
-        config.setSalesTax(0);
+        when(config.getSalesTax()).thenReturn(0.0);
+
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
-        ItemListing listing = new ItemListing(stack, false, config);
+        ItemListing listing = new ItemListing(stack, false, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
         listing.setInventory(1000);
         listing.setEquilibrium(1000);
-        //plugin.getListingManager().addListing(stack, listing);
 
         when(inventory.getItemInMainHand()).thenReturn(stack);
-        
+        when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
+
         // Act
         tm.sellHand(player);
         
@@ -89,14 +91,13 @@ public class TransactionCommandsTest extends AdminMarketTest {
     public void testSellHandLargeStack() throws Exception {
         // Arrange
         // Economic stuff...
-        Config config = new Config();
         ItemStack stack = new ItemStack(Material.STONE, 64, (short) 1);
-        ItemListing listing = new ItemListing(stack, false, config);
+        ItemListing listing = new ItemListing(stack, false, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
-        //plugin.getListingManager().addListing(stack, listing);
 
         when(inventory.getItemInMainHand()).thenReturn(stack);
-        
+        when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
+
         // Act
         tm.sellHand(player);
         
