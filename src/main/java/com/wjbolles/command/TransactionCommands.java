@@ -171,16 +171,10 @@ public class TransactionCommands {
     }
 
     public boolean addItems(Player sender, ItemStack stack,
-            double basePrice, boolean isInfinite) {
-        try {
-            ItemListing listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
-            listing.setBasePrice(basePrice);
-            listingDao.insertItemListing(listing);
-        } catch (Exception e) {
-            sender.sendMessage("An unexpected error has occurred.");
-            e.printStackTrace();
-            return false;
-        }
+            double basePrice, boolean isInfinite) throws Exception {
+        ItemListing listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
+        listing.setBasePrice(basePrice);
+        listingDao.insertItemListing(listing);
         return true;
     }
 

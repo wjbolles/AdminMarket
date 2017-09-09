@@ -74,8 +74,13 @@ public class ShopCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Item not recognized!");
                 return false;
             }
-            
-            return transactionCommands.sellItem((Player) sender, stack, amount);
+            try {
+                return transactionCommands.sellItem((Player) sender, stack, amount);
+            } catch (Exception e) {
+                e.printStackTrace();
+                sender.sendMessage("An unexpected error occurred");
+                return true;
+            }
         }
     }
 
@@ -99,7 +104,13 @@ public class ShopCommandExecutor implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Item not recognized!");
             return false;
         }
-        
-        return transactionCommands.buyItems((Player) sender, stack, amount);
+
+        try {
+            return transactionCommands.buyItems((Player) sender, stack, amount);
+        }catch (Exception e) {
+            e.printStackTrace();
+            sender.sendMessage("An unexpected error occurred");
+            return true;
+        }
     }
 }

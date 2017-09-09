@@ -8,4 +8,4 @@ commands:
         usage: /<command> [help|buy|sell|list] [args]
    shopop:
         description: All Shop Commands
-        usage: /<command> [add|inventory] [args]
+        usage: /<command> [add|update [inventory|baseprice|equilibrium]]] [args]

@@ -70,9 +70,14 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Parameter not recognized!");
             return false;
         }
-        ItemListing listing = listingDao.findItemListing(stack);
-        listing.setEquilibrium(equilibrium);
-        listingDao.updateItemListing(listing);
+        try {
+            ItemListing listing = listingDao.findItemListing(stack);
+            listing.setEquilibrium(equilibrium);
+            listingDao.updateItemListing(listing);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sender.sendMessage("An unexpected error occurred.");
+        }
         return true;
     }
     private boolean helpCommand(CommandSender sender, String[] args) {
@@ -97,9 +102,14 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Parameter not recognized!");
             return false;
         }
-        ItemListing listing = listingDao.findItemListing(stack);
-        listing.setBasePrice(basePrice);
-        listingDao.updateItemListing(listing);
+        try {
+            ItemListing listing = listingDao.findItemListing(stack);
+            listing.setBasePrice(basePrice);
+            listingDao.updateItemListing(listing);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sender.sendMessage("An unexpected error occurred.");
+        }
         return true;
     }
     
@@ -121,9 +131,15 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Parameter not recognized!");
             return false;
         }
-        ItemListing listing = listingDao.findItemListing(stack);
-        listing.setInventory(inventory);
-        listingDao.updateItemListing(listing);
+
+        try {
+            ItemListing listing = listingDao.findItemListing(stack);
+            listing.setInventory(inventory);
+            listingDao.updateItemListing(listing);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sender.sendMessage("An unexpected error occurred.");
+        }
         return true;
     }
 
@@ -151,7 +167,12 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Item not in the shop!");
             return false;
         }
-        
-        return tm.addItems((Player) sender, stack, basePrice, isInfinite);
+        try {
+            return tm.addItems((Player) sender, stack, basePrice, isInfinite);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sender.sendMessage("An unexpected error has occurred.");
+            return true;
+        }
     }
 }
