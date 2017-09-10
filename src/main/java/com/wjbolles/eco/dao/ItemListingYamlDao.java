@@ -11,31 +11,30 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ItemListingYamlDao implements ItemListingDao {
 
     private AdminMarket plugin;
     private Logger log;
-    private DecimalFormat df = new DecimalFormat("#.00");
-    private HashMap<String, ItemListing> listings = new HashMap<String, ItemListing>();
+    private HashMap<String, ItemListing> listings = new HashMap<>();
 
     public ItemListingYamlDao(AdminMarket plugin) {
         this.plugin = plugin;
         this.log = plugin.getLog();
         log.info("Loading items...");
         loadItems();
-        df.setGroupingUsed(true);
-        df.setGroupingSize(3);
     }
 
     public void loadItems() {
         File itemsDir = new File(Consts.PLUGIN_ITEMS_DIR);
         File[] items = itemsDir.listFiles();
 
-        for (File itemFile : items) {
+        for (File itemFile : items != null ? items : new File[0]) {
             ItemListing listing = null;
             try {
                 listing = itemListingFactory(itemFile, plugin.getPluginConfig());
@@ -43,6 +42,7 @@ public class ItemListingYamlDao implements ItemListingDao {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            assert listing != null;
             ItemStack stack = new ItemStack(listing.getStack().getType(), 1, listing.getStack().getDurability());
             listings.put(generateStackKey(stack), listing);
         }
@@ -70,7 +70,7 @@ public class ItemListingYamlDao implements ItemListingDao {
 
     }
 
-    public String generateStackKey(ItemStack stack) {
+    private String generateStackKey(ItemStack stack) {
         return stack.getType() + ":" + stack.getDurability();
     }
 
@@ -86,57 +86,48 @@ public class ItemListingYamlDao implements ItemListingDao {
     }
 
     private void updateYamlConf(ItemListing listing) throws IOException, InvalidConfigurationException {
-
-        YamlConfiguration yamlConf = new YamlConfiguration();
         File listingConf = getListingConfFile(listing);
 
         saveAllParameters(listing, listingConf);
     }
 
-    public boolean insertItemListing(ItemListing listing) {
-        listings.put(generateStackKey(listing.getStack()), listing);
-        try {
-            initNewConf(listing);
-        } catch (Exception e) {
-            // TODO log
-            return false;
+    public void insertItemListing(ItemListing listing) throws Exception {
+        String key = generateStackKey(listing.getStack());
+        listings.put(key, listing);
+        initNewConf(listing);
+    }
+
+    public void updateItemListing(ItemListing listing) throws IOException, InvalidConfigurationException {
+        updateYamlConf(listing);
+    }
+
+    public void deleteItemListing(ItemListing listing) throws Exception {
+        String key = generateStackKey(listing.getStack());
+        if(!listings.containsKey(key)) {
+            throw new Exception("The specified listing was not found.");
         }
-        return true;
+        Files.delete(Paths.get(getListingConfFile(listing).getPath()));
+        listings.remove(key);
     }
 
-    public boolean updateItemListing(ItemListing listing) {
-        try {
-            updateYamlConf(listing);
-        } catch (IOException e) {
-            return false;
-        } catch (InvalidConfigurationException e) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean deleteItemListing(ItemListing listing) {
-        getListingConfFile(listing).delete();
-        return true;
-    }
-
-    public File getListingConfFile(ItemListing listing){
-        File itemConf = new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
+    File getListingConfFile(ItemListing listing){
+        return new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
                 listing.getStack().getType()+"-"+
                 listing.getStack().getDurability()+".yml");
-        return itemConf;
     }
 
     private void initNewConf(ItemListing listing) throws Exception {
-
         File listingConf = getListingConfFile(listing);
 
         if(listingConf.exists()) {
+            log.log(Level.SEVERE, "ItemListingYamlDao: Listing conf file already exists, cannot create a new one!");
             throw new IllegalStateException();
         }
-        listingConf.createNewFile();
+        if(!listingConf.createNewFile()) {
+            log.log(Level.SEVERE, "ItemListingYamlDao: - Failed to create listing file!");
+            throw new IOException("Failed to create listing file.");
+        }
         saveAllParameters(listing, listingConf);
-
     }
 
     private void saveAllParameters(ItemListing listing, File listingConf) throws IOException, InvalidConfigurationException {

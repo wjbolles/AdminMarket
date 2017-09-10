@@ -16,7 +16,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class VaultEconomyWrapperImpl implements EconomyWrapper {
     
-    private static AdminMarket plugin;
+    private AdminMarket plugin;
     
     private Economy economy;
     
@@ -52,12 +52,11 @@ public class VaultEconomyWrapperImpl implements EconomyWrapper {
         economy.withdrawPlayer(player, amount);
     }
     
-    private boolean setupEconomy() {
+    private void setupEconomy() {
         RegisteredServiceProvider<Economy> economyProvider = plugin.getServer().getServicesManager().getRegistration(Economy.class);
         if (economyProvider != null) {
             economy = economyProvider.getProvider();
         }
 
-        return (economy != null);
     }
 }

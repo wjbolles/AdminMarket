@@ -54,7 +54,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         // Listing
         boolean isInfinite = false;
-        when(config.shouldUseFloatingPrices()).thenReturn(true);
+        when(config.getShouldUseFloatingPrices()).thenReturn(true);
         listing = new ItemListing(stack,true,config);
 
     }

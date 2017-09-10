@@ -8,13 +8,8 @@
 
 package com.wjbolles.eco.model;
 
-import java.io.File;
-
 import com.wjbolles.Config;
-import com.wjbolles.adminmarket.utils.Consts;
 
-import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemListing {
@@ -88,7 +83,7 @@ public class ItemListing {
     }
 
     private double getSellPrice(int inventory) {
-        if(config.shouldUseFloatingPrices() && !isInfinite) {
+        if(config.getShouldUseFloatingPrices() && !isInfinite) {
             double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/-equilibrium;
             double sellPrice = basePrice * config.getMaxPercentBasePrice() - slope * inventory;
             if (sellPrice < basePrice * 0.40) {
@@ -106,7 +101,7 @@ public class ItemListing {
 
     private double getBuyPrice(int inventory) {
         double buyPrice = 0;
-        if(config.shouldUseFloatingPrices() && !isInfinite) {
+        if(config.getShouldUseFloatingPrices() && !isInfinite) {
             double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/-equilibrium;
             buyPrice = basePrice * config.getMaxPercentBasePrice() - slope * inventory;
             if (buyPrice < basePrice * 0.40) {
