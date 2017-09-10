@@ -17,37 +17,43 @@ import java.util.logging.Logger;
 
 import com.wjbolles.command.QueryCommands;
 import com.wjbolles.command.TransactionCommands;
+import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.economy.EconomyWrapper;
 
 import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
+import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterMethod;
 
 public class AdminMarketTest {
     
     // Plugin mock fields
     protected AdminMarket plugin;
+    protected Config config;
     protected EconomyWrapper economy;
     protected TransactionCommands tm;
     protected QueryCommands lm;
     protected Logger logger;
     protected File workingDir;
     protected HashMap<String, Double> accounts;
-    protected Config config;
     protected Player player;
     protected PlayerInventory inventory;
-    
-    protected void preparePluginMock() {      
+    protected ItemListingDao listingDao;
 
+    protected void preparePluginMock() {
         accounts = new HashMap<String, Double>();
         economy = new BasicEconomyWrapperImpl(accounts);
-        config = new Config();
         
         // Create directories
         workingDir = new File(System.getProperty("user.dir") + File.separator + "plugins");
@@ -56,25 +62,29 @@ public class AdminMarketTest {
         }
         AdminMarket.createDirectory();
 
-        // Mocks
         plugin = mock(AdminMarket.class);
+        config = mock(Config.class);
         Server mockedServer = mock(Server.class);
         ItemFactory mockedFactory = mock(ItemFactory.class);
         ItemMeta mockedMeta = mock(ItemMeta.class);
         player = mock(Player.class);
         inventory = mock(PlayerInventory.class);
-        
-        // Stubs
-        when(plugin.getEconomyWrapper()).thenReturn(economy);
+        listingDao = mock(ItemListingDao.class);
+
+        when(plugin.getPluginConfig()).thenReturn(config);
+
+        this.logger = Logger.getAnonymousLogger();
         when(plugin.getLog()).thenReturn(logger);
-        
+
+        when(plugin.getListingDao()).thenReturn(listingDao);
+        when(plugin.getEconomyWrapper()).thenReturn(economy);
+
         lm = new QueryCommands(plugin);
         when(plugin.getListingManager()).thenReturn(lm);
 
-        when(plugin.getPluginConfig()).thenReturn(config);
         tm = new TransactionCommands(plugin);
-
         when(plugin.getTransactionCommands()).thenReturn(tm);
+
         when(mockedServer.getItemFactory()).thenReturn(mockedFactory);
         when(mockedServer.isPrimaryThread()).thenReturn(true);
         when(mockedFactory.getItemMeta(any(Material.class))).thenReturn(mockedMeta);
@@ -127,7 +137,7 @@ public class AdminMarketTest {
             field.setAccessible(true);
             field.set(null, value);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot set static field " + name + ".", e);
+            throw new IllegalArgumentException("Cannot setOption static field " + name + ".", e);
         }
     }
 }

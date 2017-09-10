@@ -11,13 +11,15 @@ package com.wjbolles.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wjbolles.AdminMarketTest;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PreloadedAliasesManagerTest {
+public class PreloadedAliasesManagerTest extends AdminMarketTest {
     @Before
     public void setup() {
-        PreloadedAliasesManager.initialize(null);
+        preparePluginMock();
+        PreloadedAliasesManager.initialize(plugin);
     }
     
     @SuppressWarnings("deprecation")

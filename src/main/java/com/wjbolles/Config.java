@@ -8,49 +8,59 @@
 
 package com.wjbolles;
 
+import org.bukkit.configuration.ConfigurationOptions;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
 public class Config {
-    
-    private double salesTax;
-    private double maxPercentBasePrice;
-    private boolean useFloatingPrices;
-    private String treasuryAccount;
-    
-    public Config() {
-        this.salesTax = 0.03; // 3%
-        this.maxPercentBasePrice = 1.33; // 133% Base
-        this.useFloatingPrices = true;
-        this.treasuryAccount = "towny-server";
+    public static final String SETTING_TREASURY_ACCOUNT = "treasuryAccount";
+    public static final String SETTING_SALES_TAX = "salesTax";
+    public static final String SETTING_MAX_PERCENT_BASE_PRICE = "maxPercentBasePrice";
+    public static final String SETTING_USE_FLOATING_PRICES = "useFloatingPrices";
+
+    private JavaPlugin plugin;
+
+    Config(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    private MemoryConfiguration getConfig() {
+        return plugin.getConfig();
+    }
+
+    ConfigurationOptions options() {
+        return getConfig().options();
     }
 
     public String getTreasuryAccount() {
-        return treasuryAccount;
-    }
-
-    public void setTreasuryAccount(String treasuryAccount) {
-        this.treasuryAccount = treasuryAccount;
+        return  getConfig().getString(SETTING_TREASURY_ACCOUNT);
     }
 
     public double getSalesTax() {
-        return salesTax;
-    }
-
-    public void setSalesTax(double salesTax) {
-        this.salesTax = salesTax;
+        return getConfig().getDouble(SETTING_SALES_TAX);
     }
 
     public double getMaxPercentBasePrice() {
-        return maxPercentBasePrice;
+        return getConfig().getDouble(SETTING_MAX_PERCENT_BASE_PRICE);
+    }
+
+    public boolean getShouldUseFloatingPrices() {
+        return getConfig().getBoolean(SETTING_USE_FLOATING_PRICES);
+    }
+
+    public void setTreasuryAccount(String treasuryAccount) {
+        getConfig().set(SETTING_TREASURY_ACCOUNT, treasuryAccount);
+    }
+
+    public void setSalesTax(double salesTax) {
+        getConfig().set(SETTING_SALES_TAX, salesTax);
     }
 
     public void setMaxPercentBasePrice(double maxPercentBasePrice) {
-        this.maxPercentBasePrice = maxPercentBasePrice;
-    }
-
-    public boolean shouldUseFloatingPrices() {
-        return useFloatingPrices;
+        getConfig().set(SETTING_MAX_PERCENT_BASE_PRICE, maxPercentBasePrice);
     }
 
     public void setUseFloatingPrices(boolean useFloatingPrices) {
-        this.useFloatingPrices = useFloatingPrices;
+        getConfig().set(SETTING_USE_FLOATING_PRICES, useFloatingPrices);
     }   
 }

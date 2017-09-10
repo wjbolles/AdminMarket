@@ -12,12 +12,12 @@ import org.bukkit.OfflinePlayer;
 
 public interface EconomyWrapper {
     
-    public double getBalance(String player);
-    public double getBalance(OfflinePlayer player);
+    double getBalance(String player);
+    double getBalance(OfflinePlayer player);
     
-    public void deposit(String player, double amount);
-    public void deposit(OfflinePlayer player, double amount);
+    void deposit(String player, double amount);
+    void deposit(OfflinePlayer player, double amount);
     
-    public void withdraw(String player, double amount);
-    public void withdraw(OfflinePlayer player, double amount);
+    void withdraw(String player, double amount);
+    void withdraw(OfflinePlayer player, double amount);
 }
