@@ -174,4 +174,34 @@ public class ItemListing {
 
         return total;
     }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = stack.hashCode();
+        result = 31 * result + (isInfinite ? 1 : 0);
+        result = 31 * result + inventory;
+        temp = Double.doubleToLongBits(basePrice);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(valueAddedTax);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + equilibrium;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ItemListing that = (ItemListing) o;
+
+        if (isInfinite != that.isInfinite) return false;
+        if (inventory != that.inventory) return false;
+        if (Double.compare(that.basePrice, basePrice) != 0) return false;
+        if (Double.compare(that.valueAddedTax, valueAddedTax) != 0) return false;
+        if (equilibrium != that.equilibrium) return false;
+        return stack.equals(that.stack);
+    }
 }

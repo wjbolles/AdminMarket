@@ -8,24 +8,35 @@
 
 package com.wjbolles.eco.dao;
 
+import com.wjbolles.AdminMarket;
 import com.wjbolles.AdminMarketTest;
 import com.wjbolles.Config;
 import com.wjbolles.command.ShopCommandExecutorTest;
 import com.wjbolles.eco.model.ItemListing;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 public class ItemListingDaoYamlTest extends AdminMarketTest {
+
+    private final short MATERIAL_TYPE = 1;
+
     YamlConfiguration yamlConf;
     String correctFileName;
     ItemListing listing;
@@ -39,11 +50,14 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         logger = Logger.getLogger(ShopCommandExecutorTest.class.getName());
         preparePluginMock();
 
-        short type = 1;
-        config = mock(Config.class);
-        stack = new ItemStack(Material.STONE, 1, type);
-
-        listingDao = new ItemListingYamlDao(plugin);
+        try {
+            this.config = mock(Config.class);
+            this.stack = AdminMarketTest.getItemStackSpy(Material.STONE, 1, MATERIAL_TYPE);
+            this.listingDao = new ItemListingYamlDao(plugin);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private void arrangeInsert() throws Exception {
@@ -105,5 +119,54 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         assertEquals(yamlConf.get("inventory"), listing.getInventory());
         assertEquals(yamlConf.get("equilibrium"), listing.getEquilibrium());
         assertEquals(yamlConf.get("basePrice"), listing.getBasePrice());
+    }
+
+    @Test
+    public void updateItemListing() throws Exception {
+        // Arrange
+        arrangeInsert();
+
+        // Act
+        listingDao.insertItemListing(listing);
+
+        ItemListing updatedListing = new ItemListing(stack, false, config);
+        updatedListing.setInventory(40);
+        updatedListing.setInfinite(true);
+        updatedListing.setBasePrice(3.0);
+        listingDao.updateItemListing(updatedListing);
+
+        // Verify new parameters were stored correctly
+        File generatedConf = ((ItemListingYamlDao)listingDao).getListingConfFile(listing);
+
+        yamlConf.load(generatedConf);
+
+        // Assert
+        assertEquals(yamlConf.get("material"), updatedListing.getStack().getType().toString());
+        assertEquals((short) yamlConf.getInt("durability"), updatedListing.getStack().getDurability());
+        assertEquals(yamlConf.get("isInfinite"), updatedListing.isInfinite());
+        assertEquals(yamlConf.get("inventory"), updatedListing.getInventory());
+        assertEquals(yamlConf.get("equilibrium"), updatedListing.getEquilibrium());
+        assertEquals(yamlConf.get("basePrice"), updatedListing.getBasePrice());
+
+    }
+
+    @Test
+    public void updateItemListing2() throws Exception {
+        // Arrange
+        arrangeInsert();
+
+        // Act
+        listingDao.insertItemListing(listing);
+
+        ItemListing updatedListing = new ItemListing(stack, false, config);
+        updatedListing.setInventory(40);
+        updatedListing.setInfinite(true);
+        updatedListing.setBasePrice(3.0);
+        listingDao.updateItemListing(updatedListing);
+
+        ItemListing foundListing = listingDao.findItemListing(stack);
+
+        // Assert
+        assertEquals(foundListing, updatedListing);
     }
 }

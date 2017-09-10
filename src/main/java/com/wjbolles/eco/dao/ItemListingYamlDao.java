@@ -91,6 +91,8 @@ public class ItemListingYamlDao implements ItemListingDao {
         File listingConf = getListingConfFile(listing);
 
         saveAllParameters(listing, listingConf);
+        listings.put(generateStackKey(listing.getStack()), listing);
+
     }
 
     public boolean insertItemListing(ItemListing listing) {

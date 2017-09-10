@@ -24,6 +24,7 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFactory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.testng.annotations.AfterMethod;
@@ -105,6 +106,19 @@ public class AdminMarketTest {
     public void tearDown() {
         // Delete the ~/plugins directory for the next test
         deleteDirectory(workingDir);
+    }
+
+    /*
+        ItemListing.equals() fails without this spy
+        because the factory for getting an ItemMeta is only
+        in the server, which isn't available during testing.
+        Item stacks should be built with this method when
+        equals() is going to be used later.
+    */
+    public static ItemStack getItemStackSpy(Material type, int amount, short damage){
+        ItemStack stackSpy = spy(new ItemStack(type, amount, damage));
+        doReturn(false).when(stackSpy).hasItemMeta();
+        return stackSpy;
     }
 
     private static void setStaticField(Class<?> parent, String name, Object value) {
