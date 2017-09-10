@@ -80,12 +80,12 @@ public class ShopCommandExecutor implements CommandExecutor {
                     amount = Integer.parseInt(args[2]);
                 } catch (Exception e) {
                     sender.sendMessage(ChatColor.RED + "Amount not recognized!");
-                    return true;
+                    return false;
                 }
 
                 if (stack == null) {
                     sender.sendMessage(ChatColor.RED + "Item not recognized!");
-                    return true;
+                    return false;
                 }
                 transactionCommands.sellItem((Player) sender, stack, amount);
                 return true;
@@ -116,12 +116,12 @@ public class ShopCommandExecutor implements CommandExecutor {
             amount = Integer.parseInt(args[2]);
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Amount not recognized!");
-            return true;
+            return false;
         }
         
         if (stack == null) {
             sender.sendMessage(ChatColor.RED + "Item not recognized!");
-            return true;
+            return false;
         }
 
         try {
