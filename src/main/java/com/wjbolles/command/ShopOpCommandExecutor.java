@@ -16,25 +16,24 @@ import com.wjbolles.eco.dao.ItemListingYamlDao;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class ShopOpCommandExecutor implements CommandExecutor {
     private AdminMarket plugin;
-    private QueryCommands lm;
     private TransactionCommands tm;
     private ItemListingDao listingDao;
     public ShopOpCommandExecutor(AdminMarket plugin) {
         this.plugin = plugin;
-        this.lm = plugin.getListingManager();
         this.tm = plugin.getTransactionCommands();
-        this.listingDao = new ItemListingYamlDao(plugin);
+        this.listingDao = plugin.getListingDao();
     }
     
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         try {
             if (args[0].equalsIgnoreCase("add")) {
                 return addCommand(sender, args);
+            } else if (args[0].equalsIgnoreCase("remove")) {
+                return removeCommand(sender, args);
             } else if (args[0].equalsIgnoreCase("help")) {
                 return helpCommand(sender, args);
             } else if (args[0].equalsIgnoreCase("update")) {
@@ -58,6 +57,10 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("You do not have permission to do this!");
             return false;
         }
+        if(args.length != 4) {
+            sender.sendMessage("Usage: /shopop update equilibrium <type> <number>");
+            return true;
+        }
         ItemStack stack = CommandUtil.parseItemStack(args[2]);
         if (stack == null) {
             sender.sendMessage("Item not in the shop!");
@@ -78,6 +81,7 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             e.printStackTrace();
             sender.sendMessage("An unexpected error occurred.");
         }
+        sender.sendMessage("Successfully updated.");
         return true;
     }
     private boolean helpCommand(CommandSender sender, String[] args) {
@@ -89,6 +93,10 @@ public class ShopOpCommandExecutor implements CommandExecutor {
         if (!sender.isOp()) {
             sender.sendMessage("You do not have permission to do this!");
             return false;
+        }
+        if(args.length != 4) {
+            sender.sendMessage("Usage: /shopop update baseprice <type> <number>");
+            return true;
         }
         ItemStack stack = CommandUtil.parseItemStack(args[2]);
         if (stack == null) {
@@ -110,6 +118,7 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             e.printStackTrace();
             sender.sendMessage("An unexpected error occurred.");
         }
+        sender.sendMessage("Successfully updated.");
         return true;
     }
     
@@ -118,6 +127,10 @@ public class ShopOpCommandExecutor implements CommandExecutor {
         if (!sender.isOp()) {
             sender.sendMessage("You do not have permission to do this!");
             return false;
+        }
+        if(args.length != 4) {
+            sender.sendMessage("Usage: /shopop update inventory <type> <number>");
+            return true;
         }
         ItemStack stack = CommandUtil.parseItemStack(args[2]);
         if (stack == null) {
@@ -140,6 +153,42 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             e.printStackTrace();
             sender.sendMessage("An unexpected error occurred.");
         }
+        sender.sendMessage("Successfully updated.");
+        return true;
+    }
+
+    private boolean removeCommand(CommandSender sender, String[] args) {
+        // TODO: Permissions this later
+        if (!sender.isOp()) {
+            sender.sendMessage("You do not have permission to do this!");
+        }
+
+        if(args.length != 2) {
+            sender.sendMessage("Usage: /shopop remove <type>");
+            return true;
+        }
+
+        // Args
+        String itemStack = args[1];
+
+        ItemStack stack = CommandUtil.parseItemStack(itemStack);
+        if (stack == null) {
+            sender.sendMessage("Item type not found!");
+            return false;
+        }
+
+        try {
+            ItemListingDao listingDao = plugin.getListingDao();
+            if(listingDao.findItemListing(stack) != null) {
+                tm.removeItems(stack);
+            } else {
+                sender.sendMessage("No items found to remove.");
+            }
+            sender.sendMessage("Successfully removed.");
+        } catch (Exception e) {
+            sender.sendMessage("An unexpected error has occurred.");
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -147,6 +196,11 @@ public class ShopOpCommandExecutor implements CommandExecutor {
         // TODO: Permissions this later
         if (!sender.isOp()) {
             sender.sendMessage("You do not have permission to do this!");
+        }
+
+        if(args.length != 4) {
+            sender.sendMessage("Usage: /shopop add <type> <basePrice> <isinfinite>");
+            return true;
         }
 
         double basePrice = 0;
@@ -167,12 +221,19 @@ public class ShopOpCommandExecutor implements CommandExecutor {
             sender.sendMessage("Item not in the shop!");
             return false;
         }
+
         try {
-            return tm.addItems((Player) sender, stack, basePrice, isInfinite);
+            ItemListingDao listingDao = plugin.getListingDao();
+            if(listingDao.findItemListing(stack) == null) {
+                tm.addItems(stack, basePrice, isInfinite);
+            } else {
+                sender.sendMessage("Item is already in shop.");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
             sender.sendMessage("An unexpected error has occurred.");
-            return true;
+            e.printStackTrace();
         }
+        sender.sendMessage("Successfully added.");
+        return true;
     }
 }

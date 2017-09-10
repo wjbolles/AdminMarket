@@ -9,6 +9,7 @@
 package com.wjbolles;
 
 import java.io.File;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.wjbolles.command.QueryCommands;
@@ -39,12 +40,9 @@ public class AdminMarket extends JavaPlugin {
         economy = new VaultEconomyWrapperImpl(this);
 
         PreloadedAliasesManager.initialize(this);
+        listingDao = new ItemListingYamlDao(this);
         listingManager = new QueryCommands(this);
-        listingDao = new ItemListingYamlDao(this);
         transactionCommands = new TransactionCommands(this);
-
-        listingDao = new ItemListingYamlDao(this);
-        listingDao.loadItems();
 
         setupCommands();
     }

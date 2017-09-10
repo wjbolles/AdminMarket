@@ -21,11 +21,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.text.DecimalFormat;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TransactionCommands {
     private AdminMarket plugin;
-    private QueryCommands lm;
     private Logger log;
     private final DecimalFormat df = new DecimalFormat("#.00");
     private ItemListingDao listingDao;
@@ -34,7 +34,7 @@ public class TransactionCommands {
 
     public TransactionCommands(AdminMarket plugin) {
         this.plugin = plugin;
-        this.lm = plugin.getListingManager();
+        QueryCommands lm = plugin.getListingManager();
         this.log = plugin.getLog();
         this.listingDao = plugin.getListingDao();
         this.economyWrapper = plugin.getEconomyWrapper();
@@ -45,24 +45,24 @@ public class TransactionCommands {
     }
 
     // Note: This stack should have an amount of 1.
-    public boolean buyItems(Player player, ItemStack stack, int amount) {
+    void buyItems(Player player, ItemStack stack, int amount) throws Exception {
 
         ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
-            return true;
+            return;
         }
 
         if (!listing.isInfinite() && listing.getInventory() == 0) {
             player.sendMessage(ChatColor.RED + "This item is out of stock.");
-            return true;
+            return;
         }
 
         double playerBalance = economyWrapper.getBalance(player);
         if (playerBalance < listing.getTotalBuyPrice(amount)) {
             player.sendMessage(ChatColor.RED + "You cannot afford this item.");
-            return true;
+            return;
         }
 
         // Don't oversell the inventory
@@ -88,7 +88,7 @@ public class TransactionCommands {
 
         if (amountPurchased == 0) {
             player.sendMessage(ChatColor.RED  + "There is no room in your inventory!");
-            return true;
+            return;
         }
         
         double totalCost = listing.getTotalBuyPrice(amountPurchased);
@@ -111,10 +111,9 @@ public class TransactionCommands {
         }
 
         listingDao.updateItemListing(listing);
-        return true;
     }
 
-    public boolean sellHand(Player player) {
+    void sellHand(Player player) throws Exception {
         ItemStack hand = player.getInventory().getItemInMainHand();
         ItemStack stack = new ItemStack(hand.getType(), 1, hand.getDurability());
 
@@ -122,7 +121,7 @@ public class TransactionCommands {
 
         if (listing == null || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
             player.sendMessage("This item is not in the shop.");
-            return true;
+            return;
         }
 
         double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
@@ -132,7 +131,7 @@ public class TransactionCommands {
         if (!listing.isInfinite()) {
             if (serverBalance < totalCost) {
                 player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
-                return true;
+                return;
             } else {
                 economyWrapper.withdraw(plugin.getPluginConfig().getTreasuryAccount(), totalCost);
             }
@@ -150,7 +149,6 @@ public class TransactionCommands {
             notifyPriceChange(stack, originalPrice, listing.getSellPrice());
         }
         listingDao.updateItemListing(listing);
-        return true;
     }
 
     private void notifyPriceChange(ItemStack stack, double originalPrice, double basePrice) {
@@ -170,16 +168,21 @@ public class TransactionCommands {
         }
     }
 
-    public boolean addItems(Player sender, ItemStack stack,
-            double basePrice, boolean isInfinite) throws Exception {
+    void addItems(ItemStack stack, double basePrice, boolean isInfinite) throws Exception {
         ItemListing listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
         listing.setBasePrice(basePrice);
         listingDao.insertItemListing(listing);
-        return true;
+    }
+
+    void removeItems(ItemStack stack) throws Exception {
+        ItemListing listing = listingDao.findItemListing(stack);
+        if(listing != null) {
+            listingDao.deleteItemListing(listing);
+        }
     }
 
     @SuppressWarnings("deprecation")
-    public boolean sellAll(Player player) {
+    void sellAll(Player player) throws Exception {
 
         PlayerInventory inventory = player.getInventory();
         
@@ -223,16 +226,14 @@ public class TransactionCommands {
 
         economyWrapper.deposit(player, totalSold);
         player.sendMessage("Sold for: " + ChatColor.GREEN + "+$" + df.format(totalSold));
-
-        return true;
     }
 
-    public boolean sellItem(Player player, ItemStack stack, int amount) {
+    void sellItem(Player player, ItemStack stack, int amount) {
         ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
-            return true;
+            return;
         }
 
         double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
@@ -241,7 +242,7 @@ public class TransactionCommands {
         if (!listing.isInfinite()) {
             if (serverBalance < listing.getTotalSellPrice(amount)) {
                 player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
-                return true;
+                return;
             }
         }
 
@@ -261,7 +262,7 @@ public class TransactionCommands {
 
         if (amountSold == 0) {
             player.sendMessage(ChatColor.RED  + "This item is not in your inventory!");
-            return true;
+            return;
         }
         double originalPrice = listing.getSellPrice();
         listing.addInventory(amountSold);
@@ -280,7 +281,5 @@ public class TransactionCommands {
         if (!listing.isInfinite()) {
             notifyPriceChange(stack, originalPrice, listing.getSellPrice());
         }
-        
-        return true;
     }
 }

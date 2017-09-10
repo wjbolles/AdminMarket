@@ -36,14 +36,12 @@ public class QueryCommands {
         this.plugin = plugin;
         this.log = plugin.getLog();
         log.info("Loading items...");
-        listingDao = new ItemListingYamlDao(plugin);
-        listingDao.loadItems();
-        listingDao.getAllListings();
+        listingDao = plugin.getListingDao();
         df.setGroupingUsed(true);
         df.setGroupingSize(3);
     }
 
-    public boolean listCommand(CommandSender sender, String[] args) {
+    boolean listCommand(CommandSender sender, String[] args) {
         int page;
         if (args.length == 1) {
             page = 1;
@@ -69,34 +67,34 @@ public class QueryCommands {
             int inventory = listings.get(key).getInventory();
             boolean isInfinite = listings.get(key).isInfinite();
             
-            sb.append(ChatColor.GRAY + label);
+            sb.append(ChatColor.GRAY).append(label);
             if (CommandUtil.safeDoubleEqualsZero(buyPrice)) {
-                sb.append(ChatColor.WHITE + " B: n/a");
+                sb.append(ChatColor.WHITE).append(" B: n/a");
             } else {
                 if (isInfinite || !plugin.getPluginConfig().getShouldUseFloatingPrices()) {
-                    sb.append(ChatColor.WHITE + " B: -$" + df.format(buyPrice));
+                    sb.append(ChatColor.WHITE).append(" B: -$").append(df.format(buyPrice));
                 } else if (buyPrice < basePrice) {
-                    sb.append(ChatColor.GREEN + " B: -$" + df.format(buyPrice));
+                    sb.append(ChatColor.GREEN).append(" B: -$").append(df.format(buyPrice));
                 } else {
-                    sb.append(ChatColor.RED + " B: -$" + df.format(buyPrice));
+                    sb.append(ChatColor.RED).append(" B: -$").append(df.format(buyPrice));
                 }
                 
             }
             if (CommandUtil.safeDoubleEqualsZero(sellPrice)) {
-                sb.append(ChatColor.WHITE + " S: n/a");
+                sb.append(ChatColor.WHITE).append(" S: n/a");
             } else {
                 if (isInfinite) {
-                    sb.append(ChatColor.WHITE + " S: +$" + df.format(sellPrice));
+                    sb.append(ChatColor.WHITE).append(" S: +$").append(df.format(sellPrice));
                 } else if (sellPrice > basePrice) {
-                    sb.append(ChatColor.GREEN + " S: +$" + df.format(sellPrice));
+                    sb.append(ChatColor.GREEN).append(" S: +$").append(df.format(sellPrice));
                 } else {
-                    sb.append(ChatColor.RED + " S: +$" + df.format(sellPrice)); 
+                    sb.append(ChatColor.RED).append(" S: +$").append(df.format(sellPrice));
                 }
             }
             if (isInfinite) {
-                sb.append(ChatColor.WHITE + " Inv: inf");
+                sb.append(ChatColor.WHITE).append(" Inv: inf");
             } else {
-                sb.append(ChatColor.WHITE + " Inv: "+inventory);
+                sb.append(ChatColor.WHITE).append(" Inv: ").append(inventory);
             }
             sb.append("\n");
         }
@@ -112,7 +110,7 @@ public class QueryCommands {
         return true;
     }
     
-    public boolean priceCommand(CommandSender sender, String[] args) {
+    boolean priceCommand(CommandSender sender, String[] args) {
         ItemStack stack = CommandUtil.parseItemStack(args[1]);
         
         if (stack == null) {
@@ -141,26 +139,26 @@ public class QueryCommands {
         
         StringBuilder sb = new StringBuilder();
         if (CommandUtil.safeDoubleEqualsZero(buyPrice)) {
-            sb.append(ChatColor.WHITE + "B: n/a");
+            sb.append(ChatColor.WHITE).append("B: n/a");
         } else {
             if (listing.isInfinite()) {
-                sb.append(ChatColor.WHITE + "B: -$" + df.format(buyPrice));
+                sb.append(ChatColor.WHITE).append("B: -$").append(df.format(buyPrice));
             } else if (buyPrice < basePrice) {
-                sb.append(ChatColor.GREEN + "B: -$" + df.format(buyPrice));
+                sb.append(ChatColor.GREEN).append("B: -$").append(df.format(buyPrice));
             } else {
-                sb.append(ChatColor.RED + " B: -$" + df.format(buyPrice));
+                sb.append(ChatColor.RED).append(" B: -$").append(df.format(buyPrice));
             }
             
         }
         if (CommandUtil.safeDoubleEqualsZero(sellPrice)) {
-            sb.append(ChatColor.WHITE + " S: n/a");
+            sb.append(ChatColor.WHITE).append(" S: n/a");
         } else {
             if (listing.isInfinite()) {
-                sb.append(ChatColor.WHITE + " S: +$" + df.format(sellPrice));
+                sb.append(ChatColor.WHITE).append(" S: +$").append(df.format(sellPrice));
             } else if (sellPrice > basePrice) {
-                sb.append(ChatColor.GREEN + " S: +$" + df.format(sellPrice));
+                sb.append(ChatColor.GREEN).append(" S: +$").append(df.format(sellPrice));
             } else {
-                sb.append(ChatColor.RED + " S: +$" + df.format(sellPrice)); 
+                sb.append(ChatColor.RED).append(" S: +$").append(df.format(sellPrice));
             }
         }
                 
