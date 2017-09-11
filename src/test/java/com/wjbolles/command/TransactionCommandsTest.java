@@ -51,7 +51,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
 
         // Act
-        tm.sellHand(player);
+        transactionCommands.sellHand(player);
         
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -77,7 +77,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
 
         // Act
-        tm.sellHand(player);
+        transactionCommands.sellHand(player);
         
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -99,7 +99,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
 
         // Act
-        tm.sellHand(player);
+        transactionCommands.sellHand(player);
         
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);

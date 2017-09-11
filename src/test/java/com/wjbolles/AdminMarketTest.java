@@ -8,91 +8,109 @@
 
 package com.wjbolles;
 
-import static org.mockito.Mockito.*;
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
 import com.wjbolles.command.QueryCommands;
 import com.wjbolles.command.TransactionCommands;
 import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.dao.ItemListingYamlDao;
-import com.wjbolles.eco.economy.EconomyWrapper;
-
 import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
-import com.wjbolles.eco.model.ItemListing;
+import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.Material;
 import org.bukkit.Server;
-import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFactory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterMethod;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.logging.Logger;
+
+import static org.mockito.Mockito.*;
 
 public class AdminMarketTest {
     
-    // Plugin mock fields
     protected AdminMarket plugin;
+
+    // Plugin mock fields
     protected Config config;
     protected EconomyWrapper economy;
-    protected TransactionCommands tm;
-    protected QueryCommands lm;
+    protected TransactionCommands transactionCommands;
+    protected QueryCommands queryCommands;
     protected Logger logger;
-    protected File workingDir;
-    protected HashMap<String, Double> accounts;
-    protected Player player;
-    protected PlayerInventory inventory;
     protected ItemListingDao listingDao;
 
-    protected void preparePluginMock() {
-        accounts = new HashMap<String, Double>();
-        economy = new BasicEconomyWrapperImpl(accounts);
-        
+    // Needed to test some commands
+    protected HashMap<String, Double> accounts = new HashMap<String, Double>();
+    protected Player player;
+    protected PlayerInventory inventory;
+
+    protected File workingDir;
+
+    private void createDirectoryStructure(){
         // Create directories
         workingDir = new File(System.getProperty("user.dir") + File.separator + "plugins");
         if (!workingDir.exists()) {
             workingDir.mkdir();
         }
-        AdminMarket.createDirectory();
+        doCallRealMethod().when(plugin).createDirectory();
+        plugin.createDirectory();
+    }
 
-        plugin = mock(AdminMarket.class);
-        config = mock(Config.class);
+    private void mockJavaPlugin(){
+        this.plugin = mock(AdminMarket.class);
+
         Server mockedServer = mock(Server.class);
         ItemFactory mockedFactory = mock(ItemFactory.class);
         ItemMeta mockedMeta = mock(ItemMeta.class);
-        player = mock(Player.class);
-        inventory = mock(PlayerInventory.class);
-        listingDao = mock(ItemListingDao.class);
 
-        when(plugin.getPluginConfig()).thenReturn(config);
+        doReturn(true).when(mockedServer).isPrimaryThread();
 
+        /*
+        ItemListing.equals() fails without this stub
+        because the factory for getting an ItemMeta is only
+        in the real (proprietary) server, which isn't available during testing.
+        */
+        doReturn(mockedFactory).when(mockedServer).getItemFactory();
+        doReturn(mockedMeta).when(mockedFactory).getItemMeta(any(Material.class));
+    }
+
+    private void mockPlayer(){
+        this.player = mock(Player.class);
+        this.inventory = mock(PlayerInventory.class);
+
+        doReturn("ANY_PLAYER").when(player).getName();
+        doReturn(inventory).when(player).getInventory();
+    }
+
+    private void stubAdminMarketMethods(){
         this.logger = Logger.getAnonymousLogger();
-        when(plugin.getLog()).thenReturn(logger);
+        doReturn(logger).when(plugin).getLog();
 
-        when(plugin.getListingDao()).thenReturn(listingDao);
-        when(plugin.getEconomyWrapper()).thenReturn(economy);
+        this.config = mock(Config.class);
+        doReturn(config).when(plugin).getPluginConfig();
 
-        lm = new QueryCommands(plugin);
-        when(plugin.getListingManager()).thenReturn(lm);
+        this.economy = new BasicEconomyWrapperImpl(accounts);
+        doReturn(economy).when(plugin).getEconomyWrapper();
 
-        tm = new TransactionCommands(plugin);
-        when(plugin.getTransactionCommands()).thenReturn(tm);
+        this.listingDao = new ItemListingYamlDao(plugin);
+        doReturn(listingDao).when(plugin).getListingDao();
 
-        when(mockedServer.getItemFactory()).thenReturn(mockedFactory);
-        when(mockedServer.isPrimaryThread()).thenReturn(true);
-        when(mockedFactory.getItemMeta(any(Material.class))).thenReturn(mockedMeta);
+        this.queryCommands = new QueryCommands(plugin);
+        doReturn(queryCommands).when(plugin).getQueryCommands();
 
-        when(player.getName()).thenReturn("ANY_PLAYER");
-        when(player.getInventory()).thenReturn(inventory);
+        this.transactionCommands = new TransactionCommands(plugin);
+        doReturn(transactionCommands).when(plugin).getTransactionCommands();
+    }
 
-       // setStaticField(Bukkit.class, "server", mockedServer);
+    protected void preparePluginMock() {
+        // For plugin
+        mockJavaPlugin();
+        createDirectoryStructure();
+        stubAdminMarketMethods();
+
+        // For some tests
+        mockPlayer();
     }
     
     protected boolean deleteDirectory(File directory) {
@@ -116,28 +134,5 @@ public class AdminMarketTest {
     public void tearDown() {
         // Delete the ~/plugins directory for the next test
         deleteDirectory(workingDir);
-    }
-
-    /*
-        ItemListing.equals() fails without this spy
-        because the factory for getting an ItemMeta is only
-        in the server, which isn't available during testing.
-        Item stacks should be built with this method when
-        equals() is going to be used later.
-    */
-    public static ItemStack getItemStackSpy(Material type, int amount, short damage){
-        ItemStack stackSpy = spy(new ItemStack(type, amount, damage));
-        doReturn(false).when(stackSpy).hasItemMeta();
-        return stackSpy;
-    }
-
-    private static void setStaticField(Class<?> parent, String name, Object value) {
-        try {
-            Field field = parent.getDeclaredField(name);
-            field.setAccessible(true);
-            field.set(null, value);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot setOption static field " + name + ".", e);
-        }
     }
 }

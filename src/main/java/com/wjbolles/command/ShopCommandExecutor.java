@@ -20,11 +20,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class ShopCommandExecutor implements CommandExecutor {
-    private QueryCommands lm;
+    private QueryCommands queryCommands;
     private TransactionCommands transactionCommands;
 
     public ShopCommandExecutor(AdminMarket plugin) {
-        this.lm = plugin.getListingManager();
+        this.queryCommands = plugin.getQueryCommands();
         this.transactionCommands = plugin.getTransactionCommands();
     }
 
@@ -35,9 +35,9 @@ public class ShopCommandExecutor implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("sell")) {
                 return sellCommand(sender, args);
             } else if (args[0].equalsIgnoreCase("list")) {
-                return lm.listCommand(sender, args);
+                return queryCommands.listCommand(sender, args);
             } else if (args[0].equalsIgnoreCase("price")) {
-                return lm.priceCommand(sender, args);
+                return queryCommands.priceCommand(sender, args);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             sender.sendMessage("Command not recognized!");

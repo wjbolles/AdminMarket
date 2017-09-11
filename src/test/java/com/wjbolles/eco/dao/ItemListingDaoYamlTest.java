@@ -47,12 +47,12 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
     @BeforeMethod
     public void setup() throws Exception {
-        logger = Logger.getLogger(ShopCommandExecutorTest.class.getName());
-        preparePluginMock();
 
         try {
+            logger = Logger.getLogger(ShopCommandExecutorTest.class.getName());
+            preparePluginMock();
             this.config = mock(Config.class);
-            this.stack = AdminMarketTest.getItemStackSpy(Material.STONE, 1, MATERIAL_TYPE);
+            this.stack = new ItemStack(Material.STONE, 1, MATERIAL_TYPE);
             this.listingDao = new ItemListingYamlDao(plugin);
         } catch (Exception e){
             e.printStackTrace();

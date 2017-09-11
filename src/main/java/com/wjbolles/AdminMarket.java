@@ -29,7 +29,7 @@ public class AdminMarket extends JavaPlugin {
     
     private EconomyWrapper economy;
     private TransactionCommands transactionCommands;
-    private QueryCommands listingManager;
+    private QueryCommands queryCommands;
     private ItemListingDao listingDao;
     
     @Override
@@ -41,7 +41,7 @@ public class AdminMarket extends JavaPlugin {
 
         PreloadedAliasesManager.initialize(this);
         listingDao = new ItemListingYamlDao(this);
-        listingManager = new QueryCommands(this);
+        queryCommands = new QueryCommands(this);
         transactionCommands = new TransactionCommands(this);
 
         setupCommands();
@@ -57,7 +57,7 @@ public class AdminMarket extends JavaPlugin {
         this.getCommand("shopop").setExecutor(new ShopOpCommandExecutor(this));
     }
 
-    public static void createDirectory() {
+    public void createDirectory() {
         File confDir = new File(Consts.PLUGIN_CONF_DIR);
         if (!confDir.exists()) {
             confDir.mkdir();
@@ -78,8 +78,8 @@ public class AdminMarket extends JavaPlugin {
         return economy;
     }
     
-    public QueryCommands getListingManager() {
-        return listingManager;
+    public QueryCommands getQueryCommands() {
+        return queryCommands;
     }
     
     public TransactionCommands getTransactionCommands() {

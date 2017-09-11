@@ -34,7 +34,7 @@ public class TransactionCommands {
 
     public TransactionCommands(AdminMarket plugin) {
         this.plugin = plugin;
-        QueryCommands lm = plugin.getListingManager();
+        QueryCommands queryCommands = plugin.getQueryCommands();
         this.log = plugin.getLog();
         this.listingDao = plugin.getListingDao();
         this.economyWrapper = plugin.getEconomyWrapper();
