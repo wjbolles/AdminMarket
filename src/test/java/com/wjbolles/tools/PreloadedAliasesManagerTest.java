@@ -18,7 +18,6 @@ import org.junit.Test;
 public class PreloadedAliasesManagerTest extends AdminMarketTest {
     @Before
     public void setup() {
-        preparePluginMock();
         PreloadedAliasesManager.initialize(plugin);
     }
     

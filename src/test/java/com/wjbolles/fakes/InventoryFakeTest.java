@@ -5,7 +5,7 @@
  *
  * Licensed under the Apache License, Version 2.0
  */
-
+/*
 package com.wjbolles.fakes;
 
 import static org.mockito.Mockito.*;
@@ -14,7 +14,7 @@ import static org.testng.Assert.*;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarketTest;
-import com.wjbolles.command.TransactionCommandsTest;
+import com.wjbolles.command.TransactionActionsTest;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -30,7 +30,7 @@ public class InventoryFakeTest extends AdminMarketTest {
     
     @BeforeMethod
     public void setup() { 
-        logger = Logger.getLogger(TransactionCommandsTest.class.getName());
+        logger = Logger.getLogger(TransactionActionsTest.class.getName());
         preparePluginMock();
         
         player = mock(Player.class);
@@ -91,3 +91,4 @@ public class InventoryFakeTest extends AdminMarketTest {
         assertFalse(player.getInventory().addItem(new ItemStack(Material.STONE, 1, (short) 1)).isEmpty());
     }
 }
+*/

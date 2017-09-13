@@ -8,110 +8,30 @@
 
 package com.wjbolles;
 
-import com.wjbolles.command.QueryCommands;
-import com.wjbolles.command.TransactionCommands;
-import com.wjbolles.eco.dao.ItemListingDao;
-import com.wjbolles.eco.dao.ItemListingYamlDao;
-import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
-import com.wjbolles.eco.economy.EconomyWrapper;
-import org.bukkit.Material;
-import org.bukkit.Server;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFactory;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.testng.annotations.AfterMethod;
+import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPluginLoader;
+import org.junit.After;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.logging.Logger;
 
-import static org.mockito.Mockito.*;
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ PluginManager.class, AdminMarket.class, Permission.class, Bukkit.class,
+        PluginDescriptionFile.class, JavaPluginLoader.class })
+public abstract class AdminMarketTest {
 
-public class AdminMarketTest {
-    
-    protected AdminMarket plugin;
+    protected AdminMarketSpyFactory pluginFactory = new AdminMarketSpyFactory();
+    protected AdminMarket plugin = pluginFactory.getPlugin();
+    protected PlayerSpyFactory playerFactory = new PlayerSpyFactory();
+    protected Player player = playerFactory.getPlayer();
 
-    // Plugin mock fields
-    protected Config config;
-    protected EconomyWrapper economy;
-    protected TransactionCommands transactionCommands;
-    protected QueryCommands queryCommands;
-    protected Logger logger;
-    protected ItemListingDao listingDao;
-
-    // Needed to test some commands
-    protected HashMap<String, Double> accounts = new HashMap<String, Double>();
-    protected Player player;
-    protected PlayerInventory inventory;
-
-    protected File workingDir;
-
-    private void createDirectoryStructure(){
-        // Create directories
-        workingDir = new File(System.getProperty("user.dir") + File.separator + "plugins");
-        if (!workingDir.exists()) {
-            workingDir.mkdir();
-        }
-        doCallRealMethod().when(plugin).createDirectory();
-        plugin.createDirectory();
-    }
-
-    private void mockJavaPlugin(){
-        this.plugin = mock(AdminMarket.class);
-
-        Server mockedServer = mock(Server.class);
-        ItemFactory mockedFactory = mock(ItemFactory.class);
-        ItemMeta mockedMeta = mock(ItemMeta.class);
-
-        doReturn(true).when(mockedServer).isPrimaryThread();
-
-        /*
-        ItemListing.equals() fails without this stub
-        because the factory for getting an ItemMeta is only
-        in the real (proprietary) server, which isn't available during testing.
-        */
-        doReturn(mockedFactory).when(mockedServer).getItemFactory();
-        doReturn(mockedMeta).when(mockedFactory).getItemMeta(any(Material.class));
-    }
-
-    private void mockPlayer(){
-        this.player = mock(Player.class);
-        this.inventory = mock(PlayerInventory.class);
-
-        doReturn("ANY_PLAYER").when(player).getName();
-        doReturn(inventory).when(player).getInventory();
-    }
-
-    private void stubAdminMarketMethods(){
-        this.logger = Logger.getAnonymousLogger();
-        doReturn(logger).when(plugin).getLog();
-
-        this.config = mock(Config.class);
-        doReturn(config).when(plugin).getPluginConfig();
-
-        this.economy = new BasicEconomyWrapperImpl(accounts);
-        doReturn(economy).when(plugin).getEconomyWrapper();
-
-        this.listingDao = new ItemListingYamlDao(plugin);
-        doReturn(listingDao).when(plugin).getListingDao();
-
-        this.queryCommands = new QueryCommands(plugin);
-        doReturn(queryCommands).when(plugin).getQueryCommands();
-
-        this.transactionCommands = new TransactionCommands(plugin);
-        doReturn(transactionCommands).when(plugin).getTransactionCommands();
-    }
-
-    protected void preparePluginMock() {
-        // For plugin
-        mockJavaPlugin();
-        createDirectoryStructure();
-        stubAdminMarketMethods();
-
-        // For some tests
-        mockPlayer();
-    }
+    public static final File pluginDirectory = new File("plugins/AdminMarket");
     
     protected boolean deleteDirectory(File directory) {
         if(directory.exists()){
@@ -130,9 +50,10 @@ public class AdminMarketTest {
         return(directory.delete());
     }
 
-    @AfterMethod
+    @After
     public void tearDown() {
         // Delete the ~/plugins directory for the next test
-        deleteDirectory(workingDir);
+        AdminMarketSpyFactory.unregisterServer();
+        deleteDirectory(pluginDirectory);
     }
 }

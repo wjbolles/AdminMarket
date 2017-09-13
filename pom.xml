@@ -29,6 +29,7 @@
 	<properties>
 		<spigot.version>1.12-R0.1-SNAPSHOT</spigot.version>
 		<vault.version>1.6</vault.version>
+		<powermock.version>1.7.1</powermock.version>
 	</properties>
 	<dependencies>
 		<!--Spigot API-->
@@ -52,15 +53,29 @@
 			<version>${vault.version}</version>
 		</dependency>
 		<!-- Etc -->
+		<!-- https://mvnrepository.com/artifact/org.powermock/powermock-api-mockito -->
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>6.1.1</version>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-easymock</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>3.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

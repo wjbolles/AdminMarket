@@ -6,10 +6,12 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.command;
+package com.wjbolles.command.executors;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.command.CommandUtil;
+import com.wjbolles.command.actions.QueryActions;
+import com.wjbolles.command.actions.TransactionActions;
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.command.Command;
@@ -20,12 +22,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class ShopCommandExecutor implements CommandExecutor {
-    private QueryCommands queryCommands;
-    private TransactionCommands transactionCommands;
+    private QueryActions queryActions;
+    private TransactionActions transactionActions;
 
     public ShopCommandExecutor(AdminMarket plugin) {
-        this.queryCommands = plugin.getQueryCommands();
-        this.transactionCommands = plugin.getTransactionCommands();
+        this.queryActions = plugin.getQueryActions();
+        this.transactionActions = plugin.getTransactionActions();
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -35,9 +37,9 @@ public class ShopCommandExecutor implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("sell")) {
                 return sellCommand(sender, args);
             } else if (args[0].equalsIgnoreCase("list")) {
-                return queryCommands.listCommand(sender, args);
+                return queryActions.listCommand(sender, args);
             } else if (args[0].equalsIgnoreCase("price")) {
-                return queryCommands.priceCommand(sender, args);
+                return queryActions.priceCommand(sender, args);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             sender.sendMessage("Command not recognized!");
@@ -60,13 +62,13 @@ public class ShopCommandExecutor implements CommandExecutor {
                 if(args.length != 2) {
                     sender.sendMessage("Usage: /shop sell hand");
                 }
-                transactionCommands.sellHand((Player) sender);
+                transactionActions.sellHand((Player) sender);
                 return true;
             } else if (args[1].equalsIgnoreCase("all")) {
                 if(args.length != 2) {
                     sender.sendMessage("Usage: /shop sell all");
                 }
-                transactionCommands.sellAll((Player) sender);
+                transactionActions.sellAll((Player) sender);
                 return true;
             } else {
                 if(args.length != 3) {
@@ -87,7 +89,7 @@ public class ShopCommandExecutor implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED + "Item not recognized!");
                     return false;
                 }
-                transactionCommands.sellItem((Player) sender, stack, amount);
+                transactionActions.sellItem((Player) sender, stack, amount);
                 return true;
             }
         }
@@ -125,7 +127,7 @@ public class ShopCommandExecutor implements CommandExecutor {
         }
 
         try {
-            transactionCommands.buyItems((Player) sender, stack, amount);
+            transactionActions.buyItems((Player) sender, stack, amount);
         }catch (Exception e) {
             e.printStackTrace();
             sender.sendMessage("An unexpected error occurred");

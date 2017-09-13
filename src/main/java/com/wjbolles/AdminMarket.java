@@ -9,40 +9,58 @@
 package com.wjbolles;
 
 import java.io.File;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.wjbolles.command.QueryCommands;
-import com.wjbolles.command.ShopOpCommandExecutor;
-import com.wjbolles.command.TransactionCommands;
+import com.wjbolles.command.actions.ItemListingActions;
+import com.wjbolles.command.actions.QueryActions;
+import com.wjbolles.command.executors.ShopOpCommandExecutor;
+import com.wjbolles.command.actions.TransactionActions;
 import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.economy.EconomyWrapper;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.wjbolles.adminmarket.utils.Consts;
-import com.wjbolles.command.ShopCommandExecutor;
+import com.wjbolles.command.executors.ShopCommandExecutor;
 import com.wjbolles.eco.economy.VaultEconomyWrapperImpl;
 import com.wjbolles.tools.PreloadedAliasesManager;
+import org.bukkit.plugin.java.JavaPluginLoader;
+
+import javax.management.Query;
 
 public class AdminMarket extends JavaPlugin {
     
     private EconomyWrapper economy;
-    private TransactionCommands transactionCommands;
-    private QueryCommands queryCommands;
     private ItemListingDao listingDao;
-    
+
+    private TransactionActions transactionActions;
+    private QueryActions queryActions;
+    private ItemListingActions itemListingActions;
+
+    /**
+     * This is for unit testing.
+     * @param loader The PluginLoader to use.
+     * @param description The Description file to use.
+     * @param dataFolder The folder that other datafiles can be found in.
+     * @param file The location of the plugin.
+     */
+    public AdminMarket(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+        super(loader, description, dataFolder, file);
+    }
+
     @Override
     public void onEnable() {
         createDirectory();
         setupConfig();
 
         economy = new VaultEconomyWrapperImpl(this);
-
         PreloadedAliasesManager.initialize(this);
         listingDao = new ItemListingYamlDao(this);
-        queryCommands = new QueryCommands(this);
-        transactionCommands = new TransactionCommands(this);
+
+        this.queryActions = new QueryActions(this);
+        this.transactionActions = new TransactionActions(this);
+        this.itemListingActions = new ItemListingActions(this);
 
         setupCommands();
     }
@@ -57,10 +75,15 @@ public class AdminMarket extends JavaPlugin {
         this.getCommand("shopop").setExecutor(new ShopOpCommandExecutor(this));
     }
 
+    public void setEconomyWrapper(EconomyWrapper economy) {
+        this.economy = economy;
+    }
+
     public void createDirectory() {
         File confDir = new File(Consts.PLUGIN_CONF_DIR);
         if (!confDir.exists()) {
             confDir.mkdir();
+
         }
         
         File itemsDir = new File((Consts.PLUGIN_ITEMS_DIR));
@@ -78,12 +101,28 @@ public class AdminMarket extends JavaPlugin {
         return economy;
     }
     
-    public QueryCommands getQueryCommands() {
-        return queryCommands;
+    public QueryActions getQueryActions() {
+        return queryActions;
     }
-    
-    public TransactionCommands getTransactionCommands() {
-        return transactionCommands;
+
+    public void setListingDao(ItemListingDao listingDao) {
+        this.listingDao = listingDao;
+    }
+
+    public void setTransactionActions(TransactionActions transactionActions) {
+        this.transactionActions = transactionActions;
+    }
+
+    public void setItemListingActions(ItemListingActions itemListingActions) {
+        this.itemListingActions = itemListingActions;
+    }
+
+    public void setQueryActions(QueryActions queryActions) {
+        this.queryActions = queryActions;
+    }
+
+    public TransactionActions getTransactionActions() {
+        return transactionActions;
     }
 
     public Logger getLog() {
@@ -95,4 +134,6 @@ public class AdminMarket extends JavaPlugin {
     public Config getPluginConfig() {
         return new Config(this);
     }
+
+    public ItemListingActions getItemListingActions() { return itemListingActions; }
 }

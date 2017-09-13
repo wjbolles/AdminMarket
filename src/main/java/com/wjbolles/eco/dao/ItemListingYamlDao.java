@@ -26,11 +26,13 @@ public class ItemListingYamlDao implements ItemListingDao {
     public ItemListingYamlDao(AdminMarket plugin) {
         this.plugin = plugin;
         this.log = plugin.getLog();
-        log.info("Loading items...");
+
         loadItems();
     }
 
     public void loadItems() {
+        log.info("Loading items...");
+
         File itemsDir = new File(Consts.PLUGIN_ITEMS_DIR);
         File[] items = itemsDir.listFiles();
 

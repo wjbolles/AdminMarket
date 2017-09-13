@@ -8,59 +8,79 @@
 
 package com.wjbolles.command;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.util.logging.Logger;
-
+import com.wjbolles.AdminMarketTest;
+import com.wjbolles.Config;
+import com.wjbolles.command.actions.TransactionActions;
+import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
+import com.wjbolles.eco.economy.EconomyWrapper;
 import com.wjbolles.eco.model.ItemListing;
+import com.wjbolles.fakes.InventoryFake;
 import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import com.wjbolles.AdminMarketTest;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
-public class TransactionCommandsTest extends AdminMarketTest {
-    
-    @BeforeMethod
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class TransactionActionsTest extends AdminMarketTest {
+
+    @Mock
+    private ItemListingDao listingDao;
+    private Config config = plugin.getPluginConfig();
+    private EconomyWrapper economy;
+
+    private ItemListing itemListing;
+    private HashMap<String, Double> accounts = new HashMap<String, Double>();
+
+    private PlayerInventory inventory = player.getInventory();
+    private TransactionActions transactionActions = new TransactionActions(plugin);
+
+    @Before
     public void setup() {
-        logger = Logger.getLogger(TransactionCommandsTest.class.getName());
-        preparePluginMock();
+        MockitoAnnotations.initMocks(this);
         when(config.getTreasuryAccount()).thenReturn("towny-server");
-        
         accounts.put("towny-server", 10000.0);
         accounts.put("ANY_PLAYER", 10000.0);
+        economy = new BasicEconomyWrapperImpl(accounts);
+        plugin.setEconomyWrapper(economy);
     }
 
     @Test
     public void testSellHandInfiniteListing() throws Exception {
         // Arrange
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
-        ItemListing listing = new ItemListing(stack, true, plugin.getPluginConfig());
-        listing.setBasePrice(10.0);
+        doReturn(stack).when(inventory).getItemInMainHand();
 
-        when(inventory.getItemInMainHand()).thenReturn(stack);
-        when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
+        ItemListing itemListing = new ItemListing(stack, true, plugin.getPluginConfig());
+        itemListing.setBasePrice(10.0);
+
+        doReturn(itemListing).when(listingDao).findItemListing(Matchers.any());
+
+        plugin.setListingDao(listingDao);
+        plugin.setTransactionActions(new TransactionActions(plugin));
 
         // Act
-        transactionCommands.sellHand(player);
-        
+        plugin.getTransactionActions().sellHand(player);
+
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(player, times(1)).sendMessage(captor.capture());
-        assertEquals(captor.getValue(), "Sold for: §a+$10.00", "Should have sold for $10 dollars.");
-        assertEquals(economy.getBalance(player), 10010.0, 0.001);
-        assertEquals(economy.getBalance("towny-server"), 10000.0, 0.001);
+        assertEquals("Should have sold for $10 dollars.", "Sold for: §a+$10.00",captor.getValue());
+        assertEquals(10010.0, economy.getBalance(player), 0.001);
+        assertEquals(10000.0, economy.getBalance("towny-server"), 0.001);
     }
-    
+
     @Test
     public void testSellHandLimitedListing() throws Exception {
         // Arrange
@@ -77,7 +97,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
 
         // Act
-        transactionCommands.sellHand(player);
+        transactionActions.sellHand(player);
         
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -99,7 +119,7 @@ public class TransactionCommandsTest extends AdminMarketTest {
         when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
 
         // Act
-        transactionCommands.sellHand(player);
+        transactionActions.sellHand(player);
         
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -107,12 +127,5 @@ public class TransactionCommandsTest extends AdminMarketTest {
         assertEquals(captor.getValue(), "Sold for: §a+$640.00", "Should have sold for $640 dollars.");
         assertEquals(economy.getBalance(player), 10000.0 + 64*10, 0.001);
         assertEquals(economy.getBalance("towny-server"), 10000.0 - 64*10, 0.001);
-    }    
-    
-    @AfterMethod
-    public void tearDown() {
-        // Delete the ~/plugins directory for the next test
-        deleteDirectory(workingDir);
     }
-
 }

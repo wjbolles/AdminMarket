@@ -6,13 +6,15 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.command;
+package com.wjbolles.command.executors;
 
 import com.wjbolles.AdminMarket;
 
+import com.wjbolles.command.CommandUtil;
+import com.wjbolles.command.actions.ItemListingActions;
+import com.wjbolles.command.actions.TransactionActions;
 import com.wjbolles.eco.model.ItemListing;
 import com.wjbolles.eco.dao.ItemListingDao;
-import com.wjbolles.eco.dao.ItemListingYamlDao;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,11 +22,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopOpCommandExecutor implements CommandExecutor {
     private AdminMarket plugin;
-    private TransactionCommands tm;
+    private TransactionActions transactionActions;
+    private ItemListingActions itemListingActions;
     private ItemListingDao listingDao;
+
     public ShopOpCommandExecutor(AdminMarket plugin) {
         this.plugin = plugin;
-        this.tm = plugin.getTransactionCommands();
+        this.transactionActions = plugin.getTransactionActions();
+        this.itemListingActions = plugin.getItemListingActions();
         this.listingDao = plugin.getListingDao();
     }
     
@@ -180,7 +185,7 @@ public class ShopOpCommandExecutor implements CommandExecutor {
         try {
             ItemListingDao listingDao = plugin.getListingDao();
             if(listingDao.findItemListing(stack) != null) {
-                tm.removeItems(stack);
+                itemListingActions.removeItems(stack);
             } else {
                 sender.sendMessage("No items found to remove.");
             }
@@ -225,7 +230,7 @@ public class ShopOpCommandExecutor implements CommandExecutor {
         try {
             ItemListingDao listingDao = plugin.getListingDao();
             if(listingDao.findItemListing(stack) == null) {
-                tm.addItems(stack, basePrice, isInfinite);
+                itemListingActions.addItems(stack, basePrice, isInfinite);
             } else {
                 sender.sendMessage("Item is already in shop.");
             }

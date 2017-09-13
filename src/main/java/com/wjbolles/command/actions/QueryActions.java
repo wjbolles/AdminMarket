@@ -6,7 +6,7 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.command;
+package com.wjbolles.command.actions;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarket;
+import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.model.ItemListing;
@@ -27,21 +28,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 import org.bukkit.util.ChatPaginator.ChatPage;
 
-public class QueryCommands {
+public class QueryActions {
     private AdminMarket plugin;
     private Logger log;
     private DecimalFormat df = new DecimalFormat("#.00");
     private ItemListingDao listingDao;
-    public QueryCommands(AdminMarket plugin) {
+    public QueryActions(AdminMarket plugin) {
         this.plugin = plugin;
-        this.log = plugin.getLog();
-        log.info("Loading items...");
         listingDao = plugin.getListingDao();
+
         df.setGroupingUsed(true);
         df.setGroupingSize(3);
     }
 
-    boolean listCommand(CommandSender sender, String[] args) {
+    public boolean listCommand(CommandSender sender, String[] args) {
         int page;
         if (args.length == 1) {
             page = 1;
@@ -110,7 +110,7 @@ public class QueryCommands {
         return true;
     }
     
-    boolean priceCommand(CommandSender sender, String[] args) {
+    public boolean priceCommand(CommandSender sender, String[] args) {
         ItemStack stack = CommandUtil.parseItemStack(args[1]);
         
         if (stack == null) {

@@ -6,25 +6,26 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-package com.wjbolles.command;
+package com.wjbolles.command.actions;
 
 import com.wjbolles.AdminMarket;
+import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import com.wjbolles.eco.model.ItemListing;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.text.DecimalFormat;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TransactionCommands {
+public class TransactionActions {
     private AdminMarket plugin;
     private Logger log;
     private final DecimalFormat df = new DecimalFormat("#.00");
@@ -32,9 +33,9 @@ public class TransactionCommands {
     private EconomyWrapper economyWrapper;
     private Server server;
 
-    public TransactionCommands(AdminMarket plugin) {
+    public TransactionActions(AdminMarket plugin) {
         this.plugin = plugin;
-        QueryCommands queryCommands = plugin.getQueryCommands();
+        QueryActions queryActions = plugin.getQueryActions();
         this.log = plugin.getLog();
         this.listingDao = plugin.getListingDao();
         this.economyWrapper = plugin.getEconomyWrapper();
@@ -45,7 +46,7 @@ public class TransactionCommands {
     }
 
     // Note: This stack should have an amount of 1.
-    void buyItems(Player player, ItemStack stack, int amount) throws Exception {
+    public void buyItems(Player player, ItemStack stack, int amount) throws Exception {
 
         ItemListing listing = listingDao.findItemListing(stack);
 
@@ -113,7 +114,7 @@ public class TransactionCommands {
         listingDao.updateItemListing(listing);
     }
 
-    void sellHand(Player player) throws Exception {
+    public void sellHand(Player player) throws Exception {
         ItemStack hand = player.getInventory().getItemInMainHand();
         ItemStack stack = new ItemStack(hand.getType(), 1, hand.getDurability());
 
@@ -168,21 +169,8 @@ public class TransactionCommands {
         }
     }
 
-    void addItems(ItemStack stack, double basePrice, boolean isInfinite) throws Exception {
-        ItemListing listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
-        listing.setBasePrice(basePrice);
-        listingDao.insertItemListing(listing);
-    }
-
-    void removeItems(ItemStack stack) throws Exception {
-        ItemListing listing = listingDao.findItemListing(stack);
-        if(listing != null) {
-            listingDao.deleteItemListing(listing);
-        }
-    }
-
     @SuppressWarnings("deprecation")
-    void sellAll(Player player) throws Exception {
+    public void sellAll(Player player) throws Exception {
 
         PlayerInventory inventory = player.getInventory();
         
@@ -228,7 +216,7 @@ public class TransactionCommands {
         player.sendMessage("Sold for: " + ChatColor.GREEN + "+$" + df.format(totalSold));
     }
 
-    void sellItem(Player player, ItemStack stack, int amount) {
+    public void sellItem(Player player, ItemStack stack, int amount) {
         ItemListing listing = listingDao.findItemListing(stack);
 
         if (listing == null) {

@@ -5,7 +5,7 @@
  *
  * Licensed under the Apache License, Version 2.0
  */
-
+/*
 package com.wjbolles.eco.model;
 
 import com.wjbolles.AdminMarketTest;
@@ -87,3 +87,4 @@ public class ItemListingTest extends AdminMarketTest {
 
     }
 }
+*/

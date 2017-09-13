@@ -199,4 +199,17 @@ public class ItemListing {
         if (equilibrium != that.equilibrium) return false;
         return stack.equals(that.stack);
     }
+
+    @Override
+    public String toString() {
+        return "ItemListing{" +
+                "stack=" + stack +
+                ", isInfinite=" + isInfinite +
+                ", inventory=" + inventory +
+                ", basePrice=" + basePrice +
+                ", valueAddedTax=" + valueAddedTax +
+                ", equilibrium=" + equilibrium +
+                ", config=" + config +
+                '}';
+    }
 }
