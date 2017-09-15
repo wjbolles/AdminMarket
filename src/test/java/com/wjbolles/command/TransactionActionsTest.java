@@ -8,6 +8,7 @@
 
 package com.wjbolles.command;
 
+import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.AdminMarketTest;
 import com.wjbolles.Config;
 import com.wjbolles.command.actions.TransactionActions;
@@ -37,7 +38,7 @@ public class TransactionActionsTest extends AdminMarketTest {
 
     @Mock
     private ItemListingDao listingDao;
-    private Config config = plugin.getPluginConfig();
+    private AdminMarketConfig config = plugin.getPluginConfig();
     private EconomyWrapper economy;
 
     private ItemListing itemListing;
@@ -58,6 +59,8 @@ public class TransactionActionsTest extends AdminMarketTest {
 
     @Test
     public void testSellHandInfiniteListing() throws Exception {
+        Config config;
+
         // Arrange
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
         doReturn(stack).when(inventory).getItemInMainHand();
@@ -88,23 +91,29 @@ public class TransactionActionsTest extends AdminMarketTest {
         when(config.getSalesTax()).thenReturn(0.0);
 
         ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
-        ItemListing listing = new ItemListing(stack, false, plugin.getPluginConfig());
-        listing.setBasePrice(10.0);
-        listing.setInventory(1000);
-        listing.setEquilibrium(1000);
+        ItemListing itemListing = new ItemListing(stack, true, plugin.getPluginConfig());
+        itemListing.setBasePrice(10.0);
+        itemListing.setInventory(1000);
+        itemListing.setEquilibrium(1000);
+
+        doReturn(itemListing).when(listingDao).findItemListing(Matchers.any());
+
+        plugin.setListingDao(listingDao);
+        plugin.setTransactionActions(new TransactionActions(plugin));
+
 
         when(inventory.getItemInMainHand()).thenReturn(stack);
-        when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(listing);
+        when(listingDao.findItemListing(Matchers.any(ItemStack.class))).thenReturn(itemListing);
 
         // Act
-        transactionActions.sellHand(player);
+        plugin.getTransactionActions().sellHand(player);
         
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(player, times(1)).sendMessage(captor.capture());
-        assertEquals(captor.getValue(), "Sold for: §a+$10.00", "Should have sold for $10 dollars.");
-        assertEquals(economy.getBalance(player), 10000.0 + 10, 0.01);
-        assertEquals(economy.getBalance("towny-server"), 10000.0 - 10, 0.01);
+        assertEquals("Should have sold for $10 dollars.", "Sold for: §a+$10.00", captor.getValue());
+        assertEquals(10000.0 + 10, economy.getBalance(player), 0.01);
+        assertEquals(10000.0 - 10, economy.getBalance("towny-server"),0.01);
     }
     
     @Test

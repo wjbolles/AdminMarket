@@ -71,7 +71,7 @@ public class QueryActions {
             if (CommandUtil.safeDoubleEqualsZero(buyPrice)) {
                 sb.append(ChatColor.WHITE).append(" B: n/a");
             } else {
-                if (isInfinite || !plugin.getPluginConfig().getShouldUseFloatingPrices()) {
+                if (isInfinite || !plugin.getPluginConfig().getUseFloatingPrices()) {
                     sb.append(ChatColor.WHITE).append(" B: -$").append(df.format(buyPrice));
                 } else if (buyPrice < basePrice) {
                     sb.append(ChatColor.GREEN).append(" B: -$").append(df.format(buyPrice));

@@ -54,10 +54,10 @@ public class AdminMarket extends JavaPlugin {
         createDirectory();
         setupConfig();
 
-        economy = new VaultEconomyWrapperImpl(this);
         PreloadedAliasesManager.initialize(this);
-        listingDao = new ItemListingYamlDao(this);
 
+        this.economy = getEconomyWrapper();
+        this.listingDao = new ItemListingYamlDao(this);
         this.queryActions = new QueryActions(this);
         this.transactionActions = new TransactionActions(this);
         this.itemListingActions = new ItemListingActions(this);
@@ -98,6 +98,9 @@ public class AdminMarket extends JavaPlugin {
     }
     
     public EconomyWrapper getEconomyWrapper() {
+        if (economy == null){
+            this.economy = new VaultEconomyWrapperImpl(this);
+        }
         return economy;
     }
     
@@ -131,7 +134,7 @@ public class AdminMarket extends JavaPlugin {
 
     public ItemListingDao getListingDao(){return listingDao;}
 
-    public Config getPluginConfig() {
+    public AdminMarketConfig getPluginConfig() {
         return new Config(this);
     }
 

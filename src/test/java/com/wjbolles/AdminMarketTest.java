@@ -52,8 +52,8 @@ public abstract class AdminMarketTest {
 
     @After
     public void tearDown() {
-        // Delete the ~/plugins directory for the next test
         AdminMarketSpyFactory.unregisterServer();
-        deleteDirectory(pluginDirectory);
+        // Delete the ~/plugins directory for the next test
+        deleteDirectory(pluginDirectory.getParentFile());
     }
 }

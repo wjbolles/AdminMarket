@@ -8,11 +8,17 @@
 
 package com.wjbolles.eco.model;
 
+import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.Config;
 
 import org.bukkit.inventory.ItemStack;
 
 public class ItemListing {
+
+    private static final int DEFAULT_EQUILIBRIUM = 1000;
+    private static final int DEFAULT_BASE_PRICE = 0;
+    private static final int DEFAULT_VALUE_ADDED_TAX = 0;
+    private static final int DEFAULT_INVENTORY = 0;
 
     private final ItemStack stack;
     private boolean isInfinite;
@@ -20,15 +26,21 @@ public class ItemListing {
     private double basePrice;
     private double valueAddedTax;
     private int equilibrium;
-    private Config config;
+    private AdminMarketConfig config;
 
-    public ItemListing(ItemStack stack, boolean isInfinite, Config config) throws Exception {
+    /**
+     * @param stack
+     * @param isInfinite
+     * @param config
+     * @throws Exception
+     */
+    public ItemListing(ItemStack stack, boolean isInfinite, AdminMarketConfig config) throws Exception {
         this.stack = stack;
         this.isInfinite = isInfinite;
-        this.basePrice = 0;
-        this.inventory = 0;
-        this.valueAddedTax = 0;
-        this.equilibrium = 1000;
+        this.basePrice = DEFAULT_BASE_PRICE;
+        this.inventory = DEFAULT_INVENTORY;
+        this.valueAddedTax = DEFAULT_VALUE_ADDED_TAX;
+        this.equilibrium = DEFAULT_EQUILIBRIUM;
         this.config = config;
     }
 
@@ -83,8 +95,8 @@ public class ItemListing {
     }
 
     private double getSellPrice(int inventory) {
-        if(config.getShouldUseFloatingPrices() && !isInfinite) {
-            double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/-equilibrium;
+        if(config.getUseFloatingPrices() && !isInfinite) {
+            double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/ -equilibrium;
             double sellPrice = basePrice * config.getMaxPercentBasePrice() - slope * inventory;
             if (sellPrice < basePrice * 0.40) {
                 sellPrice = basePrice * 0.40;
@@ -100,9 +112,10 @@ public class ItemListing {
     }
 
     private double getBuyPrice(int inventory) {
-        double buyPrice = 0;
-        if(config.getShouldUseFloatingPrices() && !isInfinite) {
-            double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/-equilibrium;
+        double buyPrice;
+
+        if(config.getUseFloatingPrices() && !isInfinite) {
+            double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/ -equilibrium;
             buyPrice = basePrice * config.getMaxPercentBasePrice() - slope * inventory;
             if (buyPrice < basePrice * 0.40) {
                 buyPrice = basePrice * 0.40;

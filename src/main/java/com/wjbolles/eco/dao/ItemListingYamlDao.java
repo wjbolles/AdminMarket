@@ -1,6 +1,7 @@
 package com.wjbolles.eco.dao;
 
 import com.wjbolles.AdminMarket;
+import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.Config;
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.eco.model.ItemListing;
@@ -21,7 +22,7 @@ public class ItemListingYamlDao implements ItemListingDao {
 
     private AdminMarket plugin;
     private Logger log;
-    private HashMap<String, ItemListing> listings = new HashMap<>();
+    private HashMap<String, ItemListing> listings = new HashMap();
 
     public ItemListingYamlDao(AdminMarket plugin) {
         this.plugin = plugin;
@@ -50,7 +51,7 @@ public class ItemListingYamlDao implements ItemListingDao {
         }
     }
 
-    private ItemListing itemListingFactory(File itemConf, Config config) throws Exception {
+    private ItemListing itemListingFactory(File itemConf, AdminMarketConfig config) throws Exception {
         YamlConfiguration yamlConf = new YamlConfiguration();
         yamlConf.load(itemConf);
 

@@ -8,8 +8,8 @@
 
 package com.wjbolles.eco.dao;
 
+import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.AdminMarketTest;
-import com.wjbolles.Config;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 public class ItemListingDaoYamlTest extends AdminMarketTest {
 
@@ -46,8 +45,8 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         // Listing
         boolean isInfinite = false;
-        Config config = plugin.getPluginConfig();
-        when(config.getShouldUseFloatingPrices()).thenReturn(true);
+        AdminMarketConfig config = plugin.getPluginConfig();
+        config.setUseFloatingPrices(true);
         listing = new ItemListing(stack,true,config);
     }
 
@@ -105,7 +104,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         arrangeInsert();
 
         // Act
-        Config config = plugin.getPluginConfig();
+        AdminMarketConfig config = plugin.getPluginConfig();
         plugin.getListingDao().insertItemListing(listing);
 
         ItemListing updatedListing = new ItemListing(stack, false, config);
@@ -136,7 +135,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         // Act
         plugin.getListingDao().insertItemListing(listing);
-        Config config = plugin.getPluginConfig();
+        AdminMarketConfig config = plugin.getPluginConfig();
         ItemListing updatedListing = new ItemListing(stack, false, config);
         updatedListing.setInventory(40);
         updatedListing.setInfinite(true);

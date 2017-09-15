@@ -4,14 +4,12 @@ import com.wjbolles.command.actions.ItemListingActions;
 import com.wjbolles.command.actions.QueryActions;
 import com.wjbolles.command.actions.TransactionActions;
 import com.wjbolles.eco.dao.ItemListingDao;
-import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -31,10 +29,8 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.MockGateway;
 import org.powermock.reflect.Whitebox;
-import sun.rmi.runtime.Log;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -68,7 +64,7 @@ public class AdminMarketSpyFactory {
 
     // Plugin Fields
     @Mock
-    private Config config;
+    private AdminMarketConfig config;
     private EconomyWrapper economy;
     private TransactionActions transactionActions;
     private QueryActions queryActions;
@@ -103,6 +99,8 @@ public class AdminMarketSpyFactory {
                 new File(pluginDirectory,
                 "testPluginFile")));
 
+        try { PowerMockito.doNothing().when(plugin, "setupCommands"); } catch (Exception e) {}
+
         doReturn(pluginDirectory).when(plugin).getDataFolder();
         doReturn(true).when(plugin).isEnabled();
         doReturn(Logger.getLogger(AdminMarket.class.getName())).when(plugin).getLogger();
@@ -117,7 +115,7 @@ public class AdminMarketSpyFactory {
         Bukkit.setServer(mockServer);
 
         stubAdminMarketMethods();
-        plugin.createDirectory();
+
         return plugin;
     }
 
@@ -182,6 +180,7 @@ public class AdminMarketSpyFactory {
     }
 
     private void generatePluginDescriptorFileStubs() {
+
         pluginDescriptionFile = PowerMockito.spy(new PluginDescriptionFile("AdminMarket", "0.0.1",
                 "com.wjbolles.AdminMarket"));
         when(pluginDescriptionFile.getAuthors()).thenReturn(new ArrayList<String>());
@@ -191,22 +190,11 @@ public class AdminMarketSpyFactory {
         this.logger = Logger.getAnonymousLogger();
         doReturn(logger).when(plugin).getLog();
 
-        doReturn(config).when(plugin).getPluginConfig();
-
+        // Override the economy to not use Vault
         this.economy = new BasicEconomyWrapperImpl(new HashMap<String, Double>());
         this.plugin.setEconomyWrapper(economy);
 
-        this.listingDao = new ItemListingYamlDao(plugin);
-        this.plugin.setListingDao(listingDao);
-
-        this.queryActions = new QueryActions(plugin);
-        this.plugin.setQueryActions(queryActions);
-
-        this.transactionActions = new TransactionActions(plugin);
-        this.plugin.setTransactionActions(transactionActions);
-
-        this.itemListingActions = new ItemListingActions(plugin);
-        this.plugin.setItemListingActions(itemListingActions);
+        plugin.onEnable();
     }
 
     private void generateItemMetaStubs(){

@@ -5,67 +5,60 @@
  *
  * Licensed under the Apache License, Version 2.0
  */
-/*
+
 package com.wjbolles.eco.model;
 
+import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.AdminMarketTest;
-import com.wjbolles.Config;
-import com.wjbolles.command.ShopCommandExecutorTest;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockitoAnnotations;
 
-import java.util.logging.Logger;
-
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 public class ItemListingTest extends AdminMarketTest {
-    ItemListing listing;
-    ItemStack stack;
-    Config config;
-    int amount = 30;
 
-    @BeforeMethod
+    private ItemListing listing;
+    private final short TYPE = 1;
+    private ItemStack stack = new ItemStack(Material.STONE, 1, TYPE);
+    private AdminMarketConfig config = plugin.getPluginConfig();
+
+    @Before
     public void setup() throws Exception {
-        logger = Logger.getLogger(ShopCommandExecutorTest.class.getName());
-        preparePluginMock();
-
-        short type = 1;
-        config = mock(Config.class);
-        ItemStack stack = new ItemStack(Material.STONE, 1, type);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void removeInventoryTest() throws Exception {
         // Arrange
         boolean isInfinite = false;
-        when(config.getShouldUseFloatingPrices()).thenReturn(true);
+        int amount = 30;
 
         // Act
-        listing = new ItemListing(stack,isInfinite,config);
+        listing = new ItemListing(stack,isInfinite, config);
         listing.setInventory(amount);
         listing.removeInventory(10);
 
         // Assert
-        assertEquals(listing.getInventory(), amount-10,"Should be ten fewer");
+        assertEquals(amount-10, listing.getInventory());
     }
 
     @Test
     public void getSellPriceInfiniteTest() throws Exception {
         // Arrange
         boolean isInfinite = true;
-        when(config.getShouldUseFloatingPrices()).thenReturn(true);
+        config.setUseFloatingPrices(true);
 
         // Act
-        listing = new ItemListing(stack,isInfinite,config);
+        listing = new ItemListing(stack, isInfinite, config);
         Double price = 10.0;
         listing.setBasePrice(price);
 
         // Assert
-        assertEquals(listing.getSellPrice(), price, 0.01, "Should be unchanged");
+        assertEquals(price, listing.getSellPrice(), 0.01);
     }
 
     @Test
@@ -73,18 +66,29 @@ public class ItemListingTest extends AdminMarketTest {
         // Arrange
         // Hand calculated: 13.0888
         double expectedSellPrice = 13.0888;
-        when(config.getShouldUseFloatingPrices()).thenReturn(true);
-        when(config.getMaxPercentBasePrice()).thenReturn(1.33);
+        config.setUseFloatingPrices(true);
+        config.setMaxPercentBasePrice(1.33);
 
         // Act
-        listing = new ItemListing(stack,false,config);
+        listing = new ItemListing(stack,false, config);
         listing.setInventory(64);
         Double price = 10.0;
         listing.setBasePrice(price);
 
         // Assert
-        assertEquals(listing.getSellPrice(), expectedSellPrice,0.01, "Should equal expected price");
+        assertEquals(expectedSellPrice, listing.getSellPrice(), 0.01);
 
     }
+
+    @Test
+    public void equlibriumFormulaWorks() throws Exception {
+        config.setSalesTax(0.0);
+        listing = new ItemListing(stack,false, config);
+        listing.setBasePrice(10.0);
+        listing.setValueAddedTax(0.0);
+        listing.setInventory(1000);
+        listing.setEquilibrium(1000);
+
+        assertEquals(listing.getBuyPrice(), listing.getSellPrice(), 0.01);
+    }
 }
-*/
