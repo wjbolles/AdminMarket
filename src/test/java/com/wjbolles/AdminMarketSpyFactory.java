@@ -63,14 +63,8 @@ public class AdminMarketSpyFactory {
     private PluginDescriptionFile pluginDescriptionFile;
 
     // Plugin Fields
-    @Mock
-    private AdminMarketConfig config;
     private EconomyWrapper economy;
-    private TransactionActions transactionActions;
-    private QueryActions queryActions;
-    private ItemListingActions itemListingActions;
     private Logger logger;
-    private ItemListingDao listingDao;
 
     public AdminMarketSpyFactory(){
         MockitoAnnotations.initMocks(this);
