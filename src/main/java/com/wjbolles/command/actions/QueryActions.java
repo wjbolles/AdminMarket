@@ -12,15 +12,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarket;
 import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.dao.ItemListingDao;
-import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.model.ItemListing;
-import net.milkbowl.vault.item.ItemInfo;
-import net.milkbowl.vault.item.Items;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +26,6 @@ import org.bukkit.util.ChatPaginator.ChatPage;
 
 public class QueryActions {
     private AdminMarket plugin;
-    private Logger log;
     private DecimalFormat df = new DecimalFormat("#.00");
     private ItemListingDao listingDao;
     public QueryActions(AdminMarket plugin) {
@@ -59,8 +54,8 @@ public class QueryActions {
         List<String> keys = new ArrayList<String>(listings.keySet());
         
         for(String key : keys) {
-            ItemInfo info = Items.itemByStack(listings.get(key).getStack());
-            String label = info.toString().replaceAll(" " , "");
+            ItemStack stack = listings.get(key).getStack();            
+            String label = stack.getType().name();
             Double buyPrice = listings.get(key).getBuyPrice();
             Double basePrice = listings.get(key).getBasePrice();
             Double sellPrice = listings.get(key).getSellPrice();
@@ -125,8 +120,7 @@ public class QueryActions {
             return true;
         }
         
-        ItemInfo info = Items.itemByStack(stack);
-        String label = info.toString().replaceAll(" " , "");
+        String label = stack.getType().name();
         
         double buyPrice = listing.getBuyPrice();
         double sellPrice = listing.getSellPrice();

@@ -16,25 +16,25 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class InventoryFake implements PlayerInventory {
-    
+
     final int INVENTORY_SIZE = 10;
     final int STANDARD_STACK_SIZE = 64;
     ItemStack[] inventoryMock = new ItemStack[INVENTORY_SIZE];
-    
+
     /**
-     * This assumes you're only sending in one stack, and that stack has amount
-     * 1. For our purposes, that is all we expect.
+     * This assumes you're only sending in one stack, and that stack has amount 1.
+     * For our purposes, that is all we expect.
      */
-    public HashMap<Integer, ItemStack> addItem(ItemStack... arg0)
-            throws IllegalArgumentException {
-        
+    public HashMap<Integer, ItemStack> addItem(ItemStack... arg0) throws IllegalArgumentException {
+
         HashMap<Integer, ItemStack> leftOver = new HashMap<Integer, ItemStack>();
         ItemStack stack = arg0[0];
-        
+
         // Try to fit the individual stack in each pseudo-inventory slot.
         for (int i = 0; i < INVENTORY_SIZE; i++) {
             // If it's null, it's a free slot
@@ -42,24 +42,23 @@ public class InventoryFake implements PlayerInventory {
                 inventoryMock[i] = stack;
                 break;
             }
-            
-            if (inventoryMock[i].getType().equals(stack.getType()) &&
-                inventoryMock[i].getDurability() == stack.getDurability() &&
-                inventoryMock[i].getAmount() != inventoryMock[i].getMaxStackSize()) {
-                
+
+            if (inventoryMock[i].getType().equals(stack.getType())
+                    && inventoryMock[i].getAmount() != inventoryMock[i].getMaxStackSize()) {
+
                 inventoryMock[i].setAmount(inventoryMock[i].getAmount() + 1);
                 stack = null;
             }
-            
+
             if (stack == null) {
                 break;
             }
-            
-            if (i == INVENTORY_SIZE-1) {
+
+            if (i == INVENTORY_SIZE - 1) {
                 leftOver.put(0, stack);
             }
         }
-        
+
         return leftOver;
     }
 
@@ -68,8 +67,7 @@ public class InventoryFake implements PlayerInventory {
         return null;
     }
 
-    public HashMap<Integer, ? extends ItemStack> all(Material arg0)
-            throws IllegalArgumentException {
+    public HashMap<Integer, ? extends ItemStack> all(Material arg0) throws IllegalArgumentException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -81,12 +79,12 @@ public class InventoryFake implements PlayerInventory {
 
     public void clear() {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void clear(int arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public boolean contains(int arg0) {
@@ -109,8 +107,7 @@ public class InventoryFake implements PlayerInventory {
         return false;
     }
 
-    public boolean contains(Material arg0, int arg1)
-            throws IllegalArgumentException {
+    public boolean contains(Material arg0, int arg1) throws IllegalArgumentException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -203,23 +200,22 @@ public class InventoryFake implements PlayerInventory {
 
     public void remove(Material arg0) throws IllegalArgumentException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void remove(ItemStack arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    public HashMap<Integer, ItemStack> removeItem(ItemStack... arg0)
-            throws IllegalArgumentException {
+    public HashMap<Integer, ItemStack> removeItem(ItemStack... arg0) throws IllegalArgumentException {
         // TODO Auto-generated method stub
         return null;
     }
 
     public void setContents(ItemStack[] arg0) throws IllegalArgumentException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public ItemStack[] getStorageContents() {
@@ -232,7 +228,7 @@ public class InventoryFake implements PlayerInventory {
 
     public void setMaxStackSize(int arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public int clear(int arg0, int arg1) {
@@ -286,7 +282,7 @@ public class InventoryFake implements PlayerInventory {
 
     public void setArmorContents(ItemStack[] arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void setExtraContents(ItemStack[] itemStacks) {
@@ -295,7 +291,7 @@ public class InventoryFake implements PlayerInventory {
 
     public void setBoots(ItemStack arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public ItemStack getItemInMainHand() {
@@ -316,17 +312,17 @@ public class InventoryFake implements PlayerInventory {
 
     public void setChestplate(ItemStack arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void setHeldItemSlot(int arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void setHelmet(ItemStack arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void setItem(int arg0, ItemStack arg1) {
@@ -335,12 +331,30 @@ public class InventoryFake implements PlayerInventory {
 
     public void setItemInHand(ItemStack arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void setLeggings(ItemStack arg0) {
         // TODO Auto-generated method stub
-        
+
+    }
+
+    @Override
+    public boolean isEmpty() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setItem(EquipmentSlot slot, ItemStack item) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public ItemStack getItem(EquipmentSlot slot) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

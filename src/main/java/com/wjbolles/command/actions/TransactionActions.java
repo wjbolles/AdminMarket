@@ -14,20 +14,17 @@ import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import com.wjbolles.eco.model.ItemListing;
 import net.md_5.bungee.api.ChatColor;
-import net.milkbowl.vault.item.ItemInfo;
-import net.milkbowl.vault.item.Items;
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.text.DecimalFormat;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 
 public class TransactionActions {
     private AdminMarket plugin;
-    private Logger log;
+    //private Logger log;
     private final DecimalFormat df = new DecimalFormat("#.00");
     private ItemListingDao listingDao;
     private EconomyWrapper economyWrapper;
@@ -35,8 +32,8 @@ public class TransactionActions {
 
     public TransactionActions(AdminMarket plugin) {
         this.plugin = plugin;
-        QueryActions queryActions = plugin.getQueryActions();
-        this.log = plugin.getLog();
+        // QueryActions queryActions = plugin.getQueryActions();
+        // this.log = plugin.getLog();
         this.listingDao = plugin.getListingDao();
         this.economyWrapper = plugin.getEconomyWrapper();
         this.server = plugin.getServer();
@@ -74,7 +71,7 @@ public class TransactionActions {
         // Working with inventories is difficult. It's easier to just add them
         // one at a time
         // and check if we've run out of room than parse the inventory first.
-        ItemStack individualItem = new ItemStack(stack.getType(), 1, stack.getDurability());
+        ItemStack individualItem = new ItemStack(stack.getType(), 1);
 
         int amountPurchased;
         for (amountPurchased = 0; amountPurchased < amount; amountPurchased++) {
@@ -116,7 +113,7 @@ public class TransactionActions {
 
     public void sellHand(Player player) throws Exception {
         ItemStack hand = player.getInventory().getItemInMainHand();
-        ItemStack stack = new ItemStack(hand.getType(), 1, hand.getDurability());
+        ItemStack stack = new ItemStack(hand.getType(), 1);
 
         ItemListing listing = listingDao.findItemListing(stack);
 
@@ -153,8 +150,7 @@ public class TransactionActions {
     }
 
     private void notifyPriceChange(ItemStack stack, double originalPrice, double basePrice) {
-        ItemInfo info = Items.itemByStack(stack);
-        String label = info.toString().replaceAll(" " , "");
+        String label = stack.getType().name();
         
         double difference = basePrice - originalPrice;
         String msg;
@@ -236,7 +232,7 @@ public class TransactionActions {
 
         // Working with inventories is difficult. It's easier to just remove them
         // one at a time
-        ItemStack individualItem = new ItemStack(stack.getType(), 1, stack.getDurability());
+        ItemStack individualItem = new ItemStack(stack.getType(), 1);
 
         int amountSold;
         for (amountSold = 0; amountSold < amount; amountSold++) {

@@ -1,6 +1,5 @@
 package com.wjbolles.command.actions;
 
-import com.wjbolles.AdminMarket;
 import com.wjbolles.AdminMarketTest;
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.eco.model.ItemListing;
@@ -16,12 +15,11 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 public class ItemListingActionsTest extends AdminMarketTest {
-    private final short MATERIAL_TYPE = 1;
 
-    private ItemStack stack = new ItemStack(Material.STONE, 1, MATERIAL_TYPE);
+    private ItemStack stack = new ItemStack(Material.STONE, 1);
     private ItemListingActions itemListingActions = new ItemListingActions(this.plugin);
 
-    File conf = new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar + "STONE-1.yml");
+    File conf = new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar + "STONE.yml");
     YamlConfiguration yamlConf = new YamlConfiguration();
 
     @Before
@@ -45,7 +43,7 @@ public class ItemListingActionsTest extends AdminMarketTest {
         yamlConf.load(conf);
 
         assertEquals(stack.getType().toString(), yamlConf.get("material"));
-        assertEquals(stack.getDurability(), (short) yamlConf.getInt("durability"));
+        // assertEquals(stack.getDurability(), (short) yamlConf.getInt("durability"));
         assertEquals(true, yamlConf.get("isInfinite"));
         assertEquals(0, yamlConf.get("inventory"));
         assertEquals(1000, yamlConf.get("equilibrium"));

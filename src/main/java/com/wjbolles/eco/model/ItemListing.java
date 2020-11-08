@@ -9,7 +9,6 @@
 package com.wjbolles.eco.model;
 
 import com.wjbolles.AdminMarketConfig;
-import com.wjbolles.Config;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -32,9 +31,8 @@ public class ItemListing {
      * @param stack
      * @param isInfinite
      * @param config
-     * @throws Exception
      */
-    public ItemListing(ItemStack stack, boolean isInfinite, AdminMarketConfig config) throws Exception {
+    public ItemListing(ItemStack stack, boolean isInfinite, AdminMarketConfig config) {
         this.stack = stack;
         this.isInfinite = isInfinite;
         this.basePrice = DEFAULT_BASE_PRICE;
@@ -83,7 +81,7 @@ public class ItemListing {
         this.inventory += inventory;
     }
 
-    public void removeInventory(int inventory) {
+    public void removeInventory(int inventory) throws IllegalArgumentException {
         if (this.inventory - inventory < 0) {
             throw new IllegalArgumentException();
         }
@@ -216,7 +214,7 @@ public class ItemListing {
     @Override
     public String toString() {
         return "ItemListing{" +
-                "stack=" + stack +
+                "stack=" + stack.getType().name() +
                 ", isInfinite=" + isInfinite +
                 ", inventory=" + inventory +
                 ", basePrice=" + basePrice +

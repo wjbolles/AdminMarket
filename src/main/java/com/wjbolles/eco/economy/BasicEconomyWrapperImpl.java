@@ -10,7 +10,6 @@ package com.wjbolles.eco.economy;
 
 import java.util.HashMap;
 
-import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.OfflinePlayer;
 
 public class BasicEconomyWrapperImpl implements EconomyWrapper {

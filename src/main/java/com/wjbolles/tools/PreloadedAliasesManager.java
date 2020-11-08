@@ -19,10 +19,12 @@ import com.wjbolles.AdminMarket;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+@Deprecated
 public class PreloadedAliasesManager {
 
     private static AdminMarket plugin;
     public static HashMap<String, ItemStack> aliasMap = new HashMap<String, ItemStack>();
+    // TODO: This file format is no longer valid for the latest Minecraft
     private static final String ALIAS_STORE = "/preloaded_aliases.txt";
     private static BufferedReader reader;
 
@@ -46,8 +48,7 @@ public class PreloadedAliasesManager {
             while (line != null) { 
                 String alias = line.split(",")[0];
                 String material  = line.split(",")[1];
-                short durability = Short.parseShort(line.split(",")[2]);
-                ItemStack stack = new ItemStack(Material.getMaterial(material), 1, durability);
+                ItemStack stack = new ItemStack(Material.getMaterial(material), 1);
                 aliasMap.put(alias, stack);
                 
                 line = reader.readLine();
