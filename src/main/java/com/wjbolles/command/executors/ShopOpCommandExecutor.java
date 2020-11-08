@@ -12,7 +12,6 @@ import com.wjbolles.AdminMarket;
 
 import com.wjbolles.command.CommandUtil;
 import com.wjbolles.command.actions.ItemListingActions;
-import com.wjbolles.command.actions.TransactionActions;
 import com.wjbolles.eco.model.ItemListing;
 import com.wjbolles.eco.dao.ItemListingDao;
 import org.bukkit.command.Command;
@@ -22,13 +21,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopOpCommandExecutor implements CommandExecutor {
     private AdminMarket plugin;
-    private TransactionActions transactionActions;
     private ItemListingActions itemListingActions;
     private ItemListingDao listingDao;
 
     public ShopOpCommandExecutor(AdminMarket plugin) {
         this.plugin = plugin;
-        this.transactionActions = plugin.getTransactionActions();
         this.itemListingActions = plugin.getItemListingActions();
         this.listingDao = plugin.getListingDao();
     }

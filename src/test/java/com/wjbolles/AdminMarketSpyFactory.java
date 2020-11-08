@@ -1,9 +1,5 @@
 package com.wjbolles;
 
-import com.wjbolles.command.actions.ItemListingActions;
-import com.wjbolles.command.actions.QueryActions;
-import com.wjbolles.command.actions.TransactionActions;
-import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.Bukkit;
@@ -106,7 +102,7 @@ public class AdminMarketSpyFactory {
         
         generateCommandSenderStubs();
         
-        Bukkit.setServer(mockServer);
+        // Bukkit.setServer(mockServer);
 
         stubAdminMarketMethods();
 

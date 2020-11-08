@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.wjbolles.AdminMarketTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PreloadedAliasesManagerTest extends AdminMarketTest {
@@ -23,6 +24,7 @@ public class PreloadedAliasesManagerTest extends AdminMarketTest {
     
     @SuppressWarnings("deprecation")
     @Test
+    @Ignore
     public void test() {
         System.out.println(PreloadedAliasesManager.aliasMap.size());
 

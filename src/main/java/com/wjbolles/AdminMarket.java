@@ -24,10 +24,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.command.executors.ShopCommandExecutor;
 import com.wjbolles.eco.economy.VaultEconomyWrapperImpl;
-import com.wjbolles.tools.PreloadedAliasesManager;
+// import com.wjbolles.tools.PreloadedAliasesManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
-
-import javax.management.Query;
 
 public class AdminMarket extends JavaPlugin {
     
@@ -54,7 +52,7 @@ public class AdminMarket extends JavaPlugin {
         createDirectory();
         setupConfig();
 
-        PreloadedAliasesManager.initialize(this);
+        // PreloadedAliasesManager.initialize(this);
 
         this.economy = getEconomyWrapper();
         this.listingDao = new ItemListingYamlDao(this);

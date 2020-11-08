@@ -2,7 +2,6 @@ package com.wjbolles.eco.dao;
 
 import com.wjbolles.AdminMarket;
 import com.wjbolles.AdminMarketConfig;
-import com.wjbolles.Config;
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
@@ -22,7 +21,7 @@ public class ItemListingYamlDao implements ItemListingDao {
 
     private AdminMarket plugin;
     private Logger log;
-    private HashMap<String, ItemListing> listings = new HashMap();
+    private HashMap<String, ItemListing> listings = new HashMap<String, ItemListing>();
 
     public ItemListingYamlDao(AdminMarket plugin) {
         this.plugin = plugin;
@@ -35,6 +34,7 @@ public class ItemListingYamlDao implements ItemListingDao {
         log.info("Loading items...");
 
         File itemsDir = new File(Consts.PLUGIN_ITEMS_DIR);
+        
         File[] items = itemsDir.listFiles();
 
         for (File itemFile : items != null ? items : new File[0]) {
@@ -46,7 +46,7 @@ public class ItemListingYamlDao implements ItemListingDao {
                 e.printStackTrace();
             }
             assert listing != null;
-            ItemStack stack = new ItemStack(listing.getStack().getType(), 1, listing.getStack().getDurability());
+            ItemStack stack = new ItemStack(listing.getStack().getType(), 1);
             listings.put(generateStackKey(stack), listing);
         }
     }
@@ -55,11 +55,7 @@ public class ItemListingYamlDao implements ItemListingDao {
         YamlConfiguration yamlConf = new YamlConfiguration();
         yamlConf.load(itemConf);
 
-        ItemStack stack = new ItemStack(
-                Material.getMaterial(yamlConf.getString("material")),
-                1,
-                (short) yamlConf.getInt("durability")
-        );
+        ItemStack stack = new ItemStack(Material.getMaterial(yamlConf.getString("material")), 1);
         boolean isInfinite = yamlConf.getBoolean("isInfinite");
 
         ItemListing listing = new ItemListing(stack, isInfinite, config);
@@ -72,9 +68,14 @@ public class ItemListingYamlDao implements ItemListingDao {
         return listing;
 
     }
+    @Deprecated
+    @SuppressWarnings("unused")
+    private String legacyGenerateStackKey(ItemStack stack) {
+        return stack.getType() + ":" + stack.getDurability();
+    }
 
     private String generateStackKey(ItemStack stack) {
-        return stack.getType() + ":" + stack.getDurability();
+        return stack.getType().name();
     }
 
     public HashMap<String, ItemListing> getAllListings() {
@@ -115,10 +116,17 @@ public class ItemListingYamlDao implements ItemListingDao {
         listings.remove(key);
     }
 
-    File getListingConfFile(ItemListing listing){
+    @Deprecated
+    @SuppressWarnings("unused")
+    File legacyGetListingConfFile(ItemListing listing){
         return new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
                 listing.getStack().getType()+"-"+
                 listing.getStack().getDurability()+".yml");
+    }
+
+    File getListingConfFile(ItemListing listing){
+        return new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
+                listing.getStack().getType()+".yml");
     }
 
     private void initNewConf(ItemListing listing) throws Exception {
@@ -140,7 +148,7 @@ public class ItemListingYamlDao implements ItemListingDao {
 
         yamlConf.load(listingConf);
         yamlConf.set("material", listing.getStack().getType().toString());
-        yamlConf.set("durability", listing.getStack().getDurability());
+        //yamlConf.set("durability", listing.getStack().getDurability());
         yamlConf.set("isInfinite", listing.isInfinite());
         yamlConf.set("inventory", listing.getInventory());
         yamlConf.set("equilibrium", listing.getEquilibrium());

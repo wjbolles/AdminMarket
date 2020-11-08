@@ -24,12 +24,12 @@ import static org.junit.Assert.assertEquals;
 
 public class ItemListingDaoYamlTest extends AdminMarketTest {
 
-    private final short MATERIAL_TYPE = 1;
+    // private final short MATERIAL_TYPE = 1;
 
     YamlConfiguration yamlConf;
     String correctFileName;
     ItemListing listing;
-    ItemStack stack = new ItemStack(Material.STONE, 1, MATERIAL_TYPE);;
+    ItemStack stack = new ItemStack(Material.STONE, 1);
 
     int amount = 30;
 
@@ -41,10 +41,9 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
     private void arrangeInsert() throws Exception {
         // Conf file
         yamlConf = new YamlConfiguration();
-        correctFileName = stack.getType()+"-"+stack.getDurability()+".yml";
+        correctFileName = stack.getType()+".yml";
 
         // Listing
-        boolean isInfinite = false;
         AdminMarketConfig config = plugin.getPluginConfig();
         config.setUseFloatingPrices(true);
         listing = new ItemListing(stack,true,config);
@@ -91,7 +90,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         yamlConf.load(generatedConf);
         assertEquals(listing.getStack().getType().toString(), yamlConf.get("material"));
-        assertEquals(listing.getStack().getDurability(), (short) yamlConf.getInt("durability"));
+        //assertEquals(listing.getStack().getDurability(), (short) yamlConf.getInt("durability"));
         assertEquals(listing.isInfinite(), yamlConf.get("isInfinite"));
         assertEquals(listing.getInventory(), yamlConf.get("inventory"));
         assertEquals(listing.getEquilibrium(), yamlConf.get("equilibrium"));
@@ -121,7 +120,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         // Assert
         assertEquals(updatedListing.getStack().getType().toString(), yamlConf.get("material"));
-        assertEquals(updatedListing.getStack().getDurability(), (short) yamlConf.getInt("durability"));
+        // assertEquals(updatedListing.getStack().getDurability(), (short) yamlConf.getInt("durability"));
         assertEquals(updatedListing.isInfinite(), yamlConf.get("isInfinite"));
         assertEquals(updatedListing.getInventory(), yamlConf.get("inventory"));
         assertEquals(updatedListing.getEquilibrium(), yamlConf.get("equilibrium"));
