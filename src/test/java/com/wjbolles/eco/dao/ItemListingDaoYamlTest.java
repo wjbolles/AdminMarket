@@ -20,11 +20,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 public class ItemListingDaoYamlTest extends AdminMarketTest {
-
-    // private final short MATERIAL_TYPE = 1;
 
     YamlConfiguration yamlConf;
     String correctFileName;
@@ -46,42 +45,47 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         // Listing
         AdminMarketConfig config = plugin.getPluginConfig();
         config.setUseFloatingPrices(true);
-        listing = new ItemListing(stack,true,config);
+        listing = new ItemListing(stack,true, config);
     }
 
     @Test
-    public void insertItemListingTest() throws Exception {
-        // Arrange
+    public void insertItemListingTest_interface_default() throws Exception {
         arrangeInsert();
 
-        // Act
         plugin.getListingDao().insertItemListing(listing);
 
-        // Assert
-        // Verify listing is retrievable
-        assertEquals(listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
     }
 
     @Test
-    public void insertItemListingTest2() throws Exception {
-        // Arrange
+    public void insertItemListingTest_interface_custom() throws Exception {
         arrangeInsert();
 
-        // Act
+        listing.setInfinite(false);
+        listing.setInventory(10);
+        listing.setEquilibrium(100);
+        listing.setBasePrice(20.0);
+        listing.setValueAddedTax(30);
+
         plugin.getListingDao().insertItemListing(listing);
 
-        // Assert
-        // Verify conf filename is correct
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+    }
+
+    @Test
+    public void insertItemListingTest_yamlName() throws Exception {
+        arrangeInsert();
+
+        plugin.getListingDao().insertItemListing(listing);
         File generatedConf = ((ItemListingYamlDao)plugin.getListingDao()).getListingConfFile(listing);
-        assertEquals(generatedConf.getName(), correctFileName);
+
+        assertEquals("Verify conf filename is correct", generatedConf.getName(), correctFileName);
     }
 
     @Test
-    public void insertItemListingTest3() throws Exception {
-        // Arrange
+    public void insertItemListingTest_yaml() throws Exception {
         arrangeInsert();
 
-        // Act
         plugin.getListingDao().insertItemListing(listing);
 
         // Assert
@@ -89,61 +93,94 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         File generatedConf = ((ItemListingYamlDao)plugin.getListingDao()).getListingConfFile(listing);
 
         yamlConf.load(generatedConf);
-        assertEquals(listing.getStack().getType().toString(), yamlConf.get("material"));
-        //assertEquals(listing.getStack().getDurability(), (short) yamlConf.getInt("durability"));
-        assertEquals(listing.isInfinite(), yamlConf.get("isInfinite"));
-        assertEquals(listing.getInventory(), yamlConf.get("inventory"));
-        assertEquals(listing.getEquilibrium(), yamlConf.get("equilibrium"));
-        assertEquals(listing.getBasePrice(), yamlConf.get("basePrice"));
+        assertEquals("Material in YAML should match what was stored",
+                listing.getStack().getType().toString(), yamlConf.get("material"));
+        assertEquals("Infinite in YAML should match what was stored",
+                true, yamlConf.get("isInfinite"));
+        assertEquals("Inventory in YAML should match what was stored",
+                0, yamlConf.get("inventory"));
+        assertEquals("Equilibrium in YAML should match what was stored",
+                1000, yamlConf.get("equilibrium"));
+        assertEquals("Base Price in YAML should match what was stored",
+                0.0, yamlConf.get("basePrice"));
+        assertEquals("Value Added Tax in YAML should match what was stored",
+                0.0, yamlConf.get("valueAddedTax"));
     }
 
     @Test
-    public void updateItemListing() throws Exception {
-        // Arrange
+    public void updateItemListingTest_interface_custom() throws Exception {
         arrangeInsert();
 
-        // Act
-        AdminMarketConfig config = plugin.getPluginConfig();
+        plugin.getListingDao().insertItemListing(listing);
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+
+        listing.setInfinite(false);
+        listing.setInventory(10);
+        listing.setEquilibrium(100);
+        listing.setBasePrice(20.0);
+        listing.setValueAddedTax(30);
+
+        plugin.getListingDao().updateItemListing(listing);
+
+        assertEquals("Verify listing is was updated", listing, plugin.getListingDao().findItemListing(stack));
+    }
+
+    @Test
+    public void updateItemListingTest_yaml() throws Exception {
+        arrangeInsert();
+
         plugin.getListingDao().insertItemListing(listing);
 
-        ItemListing updatedListing = new ItemListing(stack, false, config);
-        updatedListing.setInventory(40);
-        updatedListing.setInfinite(true);
-        updatedListing.setBasePrice(3.0);
+        listing.setInfinite(false);
+        listing.setInventory(10);
+        listing.setEquilibrium(100);
+        listing.setBasePrice(20.0);
+        listing.setValueAddedTax(30);
 
-        plugin.getListingDao().updateItemListing(updatedListing);
+        plugin.getListingDao().updateItemListing(listing);
 
+        // Assert
         // Verify new parameters were stored correctly
         File generatedConf = ((ItemListingYamlDao)plugin.getListingDao()).getListingConfFile(listing);
 
         yamlConf.load(generatedConf);
-
-        // Assert
-        assertEquals(updatedListing.getStack().getType().toString(), yamlConf.get("material"));
-        // assertEquals(updatedListing.getStack().getDurability(), (short) yamlConf.getInt("durability"));
-        assertEquals(updatedListing.isInfinite(), yamlConf.get("isInfinite"));
-        assertEquals(updatedListing.getInventory(), yamlConf.get("inventory"));
-        assertEquals(updatedListing.getEquilibrium(), yamlConf.get("equilibrium"));
-        assertEquals(updatedListing.getBasePrice(), yamlConf.get("basePrice"));
+        assertEquals("Material in YAML should match what was stored",
+                listing.getStack().getType().toString(), yamlConf.get("material"));
+        assertEquals("Infinite in YAML should match what was stored",
+                false, yamlConf.get("isInfinite"));
+        assertEquals("Inventory in YAML should match what was stored",
+                10, yamlConf.get("inventory"));
+        assertEquals("Equilibrium in YAML should match what was stored",
+                100, yamlConf.get("equilibrium"));
+        assertEquals("Base Price in YAML should match what was stored",
+                20.0, yamlConf.get("basePrice"));
+        assertEquals("Value Added Tax in YAML should match what was stored",
+                30.0, yamlConf.get("valueAddedTax"));
     }
 
     @Test
-    public void updateItemListing2() throws Exception {
-        // Arrange
+    public void deleteItemTest_interface() throws Exception {
         arrangeInsert();
 
-        // Act
         plugin.getListingDao().insertItemListing(listing);
-        AdminMarketConfig config = plugin.getPluginConfig();
-        ItemListing updatedListing = new ItemListing(stack, false, config);
-        updatedListing.setInventory(40);
-        updatedListing.setInfinite(true);
-        updatedListing.setBasePrice(3.0);
-        plugin.getListingDao().updateItemListing(updatedListing);
+        assertEquals("Item should have been added to the stack", stack, listing.getStack());
 
-        ItemListing foundListing = plugin.getListingDao().findItemListing(stack);
+        plugin.getListingDao().deleteItemListing(listing);
 
-        // Assert
-        assertEquals(updatedListing, foundListing);
+        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(stack));
+    }
+
+    @Test
+    public void deleteItemTest_yaml() throws Exception {
+        arrangeInsert();
+
+        plugin.getListingDao().insertItemListing(listing);
+        assertEquals("Item should have been added to the stack", stack, listing.getStack());
+        File conf = ((ItemListingYamlDao) plugin.getListingDao()).getListingConfFile(listing);
+        assertTrue("Verify the file was written", conf.exists());
+
+        plugin.getListingDao().deleteItemListing(listing);
+        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(stack));
+        assertFalse("Verify the file was removed", conf.exists());
     }
 }

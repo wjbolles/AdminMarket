@@ -153,6 +153,7 @@ public class ItemListingYamlDao implements ItemListingDao {
         yamlConf.set("inventory", listing.getInventory());
         yamlConf.set("equilibrium", listing.getEquilibrium());
         yamlConf.set("basePrice", listing.getBasePrice());
+        yamlConf.set("valueAddedTax", listing.getValueAddedTax());
         yamlConf.save(listingConf);
     }
 }
