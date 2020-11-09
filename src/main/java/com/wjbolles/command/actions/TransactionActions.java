@@ -182,7 +182,7 @@ public class TransactionActions {
             
             // The key for this assumes the stack has an amount of 1
             // TODO: probably should enforce that requirement with another method
-            ItemListing listing = listingDao.findItemListing(new ItemStack(stack.getType(), 1, stack.getDurability()));
+            ItemListing listing = listingDao.findItemListing(new ItemStack(stack.getType(), 1));
             
             if (listing == null || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
                 continue;

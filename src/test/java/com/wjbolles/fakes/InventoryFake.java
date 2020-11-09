@@ -25,6 +25,7 @@ public class InventoryFake implements PlayerInventory {
     final int INVENTORY_SIZE = 10;
     final int STANDARD_STACK_SIZE = 64;
     ItemStack[] inventoryMock = new ItemStack[INVENTORY_SIZE];
+    ItemStack mainHand = null;
 
     /**
      * This assumes you're only sending in one stack, and that stack has amount 1.
@@ -295,11 +296,11 @@ public class InventoryFake implements PlayerInventory {
     }
 
     public ItemStack getItemInMainHand() {
-        return null;
+        return this.mainHand;
     }
 
     public void setItemInMainHand(ItemStack itemStack) {
-
+        this.mainHand = itemStack;
     }
 
     public ItemStack getItemInOffHand() {
