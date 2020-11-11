@@ -32,7 +32,7 @@ public class ConfigTest extends AdminMarketTest {
 
     @Test
     public void getMaxPercentBasePriceTest() throws Exception {
-        assertEquals(1.33, config.getMaxPercentBasePrice(), 0.01);
+        assertEquals(0.33, config.getMaxPercentBasePrice(), 0.01);
     }
 
     @Test

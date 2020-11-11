@@ -1,7 +1,8 @@
 treasuryAccount: towny-server
 salesTax: 0.03
-maxPercentBasePrice: 1.33
+maxPercentBasePrice: 0.33
 useFloatingPrices: false
+storage: yaml
 console-output: true
 messages:
   msg_nope: '&cError: You do not have permission.'

@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -12,8 +12,6 @@ import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.AdminMarketTest;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -24,9 +22,8 @@ import static org.junit.Assert.*;
 
 public class ItemListingDaoSqliteTest extends AdminMarketTest {
 
-    String correctFileName;
     ItemListing listing;
-    ItemStack stack = new ItemStack(Material.STONE, 1);
+    Material material = Material.GRANITE;
 
     int amount = 30;
 
@@ -40,7 +37,7 @@ public class ItemListingDaoSqliteTest extends AdminMarketTest {
         // Listing
         AdminMarketConfig config = plugin.getPluginConfig();
         config.setUseFloatingPrices(true);
-        listing = new ItemListing(stack,true, config);
+        listing = new ItemListing(material,true, config);
     }
 
     @Test
@@ -49,7 +46,7 @@ public class ItemListingDaoSqliteTest extends AdminMarketTest {
 
         plugin.getListingDao().insertItemListing(listing);
 
-        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -64,7 +61,7 @@ public class ItemListingDaoSqliteTest extends AdminMarketTest {
 
         plugin.getListingDao().insertItemListing(listing);
 
-        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -72,7 +69,7 @@ public class ItemListingDaoSqliteTest extends AdminMarketTest {
         arrangeInsert();
 
         plugin.getListingDao().insertItemListing(listing);
-        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(material));
 
         listing.setInfinite(false);
         listing.setInventory(10);
@@ -82,7 +79,7 @@ public class ItemListingDaoSqliteTest extends AdminMarketTest {
 
         plugin.getListingDao().updateItemListing(listing);
 
-        assertEquals("Verify listing is was updated", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is was updated", listing, plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -90,11 +87,11 @@ public class ItemListingDaoSqliteTest extends AdminMarketTest {
         arrangeInsert();
 
         plugin.getListingDao().insertItemListing(listing);
-        assertEquals("Item should have been added to the stack", stack, listing.getStack());
+        assertEquals("Item should have been added to the material", material, listing.getMaterial());
 
         plugin.getListingDao().deleteItemListing(listing);
 
-        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(stack));
+        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(material));
     }
 
 }

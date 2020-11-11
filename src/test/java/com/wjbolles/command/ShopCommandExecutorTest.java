@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -35,26 +35,25 @@ public class ShopCommandExecutorTest extends AdminMarketTest {
     public void testGetListing() throws Exception {
         // Arrange
         // Economic stuff...
-        ItemStack stack = new ItemStack(Material.STONE, 1);
-        ItemListing listing = new ItemListing(stack, true, plugin.getPluginConfig());
+        ItemListing listing = new ItemListing(Material.GRANITE, true, plugin.getPluginConfig());
         listing.setBasePrice(10.0);
         ItemListingDao listingDao = plugin.getListingDao();
         listingDao.insertItemListing(listing);
 
         Player player = mock(Player.class);
-        
+
         // Act
         ShopCommandExecutor ex = new ShopCommandExecutor(plugin);
         ex.onCommand(player, null, null, new String[]{"list"});
-        
+
         // Assert
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(player, atLeastOnce()).sendMessage(captor.capture());
-        
+
         for(String s : captor.getAllValues()) {
             System.out.println("Debug: " + s);
         }
-        
+
         assertTrue(true);
     }
 }

@@ -1,11 +1,25 @@
 name: AdminMarket
+version: 1.0
 main: com.wjbolles.AdminMarket
-version: 0.1
+description: A simple, command line driven marketplace for Spigot
+author: wjbolles
+website: https://github.com/wjbolles/
+api-version: 1.16
 depend: [Vault]
+
 commands:
    shop:
         description: Shop Commands
-        usage: /<command> [help|buy|sell|list] [args]
+        usage: |
+            /<command> [help | buy | sell | list | price] [args]
+            e.g., /<command> buy <material> <amount>
+            e.g., /<command> sell hand
+            e.g., /<command> sell <material> <amount>
+            e.g., /<command> price <material>
    shopop:
-        description: All Shop Commands
-        usage: /<command> [add|remove|update [inventory|baseprice|equilibrium]]] [args]
+        description: Shop Admin Commands
+        usage: |
+            /<command> [add | remove | import | update [inventory | baseprice | equilibrium]]] [args]
+            e.g., /<command> add <material> <price> <is_infinite>
+            e.g., /<command> remove <material>
+            e.g., /<command> update

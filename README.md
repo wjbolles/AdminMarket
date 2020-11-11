@@ -18,4 +18,4 @@ AdminMarket Minecraft Plugin
 * /shopop help
 * /shopop update inventory \<material\> \<number\>
 * /shopop update baseprice \<material\> \<basePrice\>
-* /shopop update equilibrium \<type\> \<equilibriumValue\>
+* /shopop update equilibrium \<type\> \<equilibrium\>

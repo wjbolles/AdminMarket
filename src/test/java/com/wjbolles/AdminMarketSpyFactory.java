@@ -16,7 +16,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -32,9 +32,9 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
@@ -162,9 +162,9 @@ public class AdminMarketSpyFactory {
         when(commandSender.getServer()).thenReturn(mockServer);
         when(commandSender.getName()).thenReturn("MockCommandSender");
         when(commandSender.isPermissionSet(anyString())).thenReturn(true);
-        when(commandSender.isPermissionSet(Matchers.isA(Permission.class))).thenReturn(true);
+        when(commandSender.isPermissionSet(ArgumentMatchers.isA(Permission.class))).thenReturn(true);
         when(commandSender.hasPermission(anyString())).thenReturn(true);
-        when(commandSender.hasPermission(Matchers.isA(Permission.class))).thenReturn(true);
+        when(commandSender.hasPermission(ArgumentMatchers.isA(Permission.class))).thenReturn(true);
         when(commandSender.addAttachment(plugin)).thenReturn(null);
         when(commandSender.isOp()).thenReturn(true);
     }

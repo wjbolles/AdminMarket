@@ -3,6 +3,7 @@ package com.wjbolles.eco.dao;
 import com.wjbolles.AdminMarket;
 import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.adminmarket.utils.Consts;
+import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -46,7 +47,7 @@ public class ItemListingYamlDao implements ItemListingDao {
                 e.printStackTrace();
             }
             assert listing != null;
-            ItemStack stack = new ItemStack(listing.getStack().getType(), 1);
+            ItemStack stack = new ItemStack(listing.getMaterial(), 1);
             listings.put(generateStackKey(stack), listing);
         }
     }
@@ -55,10 +56,10 @@ public class ItemListingYamlDao implements ItemListingDao {
         YamlConfiguration yamlConf = new YamlConfiguration();
         yamlConf.load(itemConf);
 
-        ItemStack stack = new ItemStack(Material.getMaterial(yamlConf.getString("material")), 1);
+        Material material = CommandUtil.materialFactory(yamlConf.getString("material"));
         boolean isInfinite = yamlConf.getBoolean("isInfinite");
 
-        ItemListing listing = new ItemListing(stack, isInfinite, config);
+        ItemListing listing = new ItemListing(material, isInfinite, config);
 
         listing.setBasePrice(yamlConf.getDouble("basePrice"));
         listing.setInventory(yamlConf.getInt("inventory"));
@@ -68,12 +69,8 @@ public class ItemListingYamlDao implements ItemListingDao {
         return listing;
 
     }
-    @Deprecated
-    @SuppressWarnings("unused")
-    private String legacyGenerateStackKey(ItemStack stack) {
-        return stack.getType() + ":" + stack.getDurability();
-    }
 
+    @Deprecated
     private String generateStackKey(ItemStack stack) {
         return stack.getType().name();
     }
@@ -82,23 +79,28 @@ public class ItemListingYamlDao implements ItemListingDao {
         return listings;
     }
 
-    public ItemListing findItemListing(ItemStack stack) {
-        if (stack.getAmount() != 1) {
+    public ItemListing findItemListing(Material material) {
+        if (material == null) {
             throw new IllegalArgumentException();
         }
-        return listings.get(generateStackKey(stack));
+        return listings.get(material.toString());
     }
 
     private void updateYamlConf(ItemListing listing) throws IOException, InvalidConfigurationException {
         File listingConf = getListingConfFile(listing);
 
         saveAllParameters(listing, listingConf);
-        listings.put(generateStackKey(listing.getStack()), listing);
+        listings.put(listing.getMaterial().toString(), listing);
 
     }
 
     public void insertItemListing(ItemListing listing) throws Exception {
-        String key = generateStackKey(listing.getStack());
+        String key = listing.getMaterial().toString();
+
+        if(listings.containsKey(key)) {
+            throw new Exception("Cannot insert listing, already exists.");
+        }
+
         listings.put(key, listing);
         initNewConf(listing);
     }
@@ -108,7 +110,7 @@ public class ItemListingYamlDao implements ItemListingDao {
     }
 
     public void deleteItemListing(ItemListing listing) throws Exception {
-        String key = generateStackKey(listing.getStack());
+        String key = listing.getMaterial().toString();
         if(!listings.containsKey(key)) {
             throw new Exception("The specified listing was not found.");
         }
@@ -116,17 +118,9 @@ public class ItemListingYamlDao implements ItemListingDao {
         listings.remove(key);
     }
 
-    @Deprecated
-    @SuppressWarnings("unused")
-    File legacyGetListingConfFile(ItemListing listing){
-        return new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
-                listing.getStack().getType()+"-"+
-                listing.getStack().getDurability()+".yml");
-    }
-
     File getListingConfFile(ItemListing listing){
         return new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
-                listing.getStack().getType()+".yml");
+                listing.getMaterial()+".yml");
     }
 
     private void initNewConf(ItemListing listing) throws Exception {
@@ -147,8 +141,7 @@ public class ItemListingYamlDao implements ItemListingDao {
         YamlConfiguration yamlConf = new YamlConfiguration();
 
         yamlConf.load(listingConf);
-        yamlConf.set("material", listing.getStack().getType().toString());
-        //yamlConf.set("durability", listing.getStack().getDurability());
+        yamlConf.set("material", listing.getMaterial().toString());
         yamlConf.set("isInfinite", listing.isInfinite());
         yamlConf.set("inventory", listing.getInventory());
         yamlConf.set("equilibrium", listing.getEquilibrium());

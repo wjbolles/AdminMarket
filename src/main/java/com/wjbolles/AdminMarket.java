@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -16,6 +16,7 @@ import com.wjbolles.command.actions.QueryActions;
 import com.wjbolles.command.executors.ShopOpCommandExecutor;
 import com.wjbolles.command.actions.TransactionActions;
 import com.wjbolles.eco.dao.ItemListingDao;
+import com.wjbolles.eco.dao.ItemListingSqliteDao;
 import com.wjbolles.eco.dao.ItemListingYamlDao;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -24,7 +25,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.wjbolles.adminmarket.utils.Consts;
 import com.wjbolles.command.executors.ShopCommandExecutor;
 import com.wjbolles.eco.economy.VaultEconomyWrapperImpl;
-// import com.wjbolles.tools.PreloadedAliasesManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
 public class AdminMarket extends JavaPlugin {
@@ -35,6 +35,10 @@ public class AdminMarket extends JavaPlugin {
     private TransactionActions transactionActions;
     private QueryActions queryActions;
     private ItemListingActions itemListingActions;
+
+    public AdminMarket() {
+        super();
+    }
 
     /**
      * This is for unit testing.
@@ -52,10 +56,8 @@ public class AdminMarket extends JavaPlugin {
         createDirectory();
         setupConfig();
 
-        // PreloadedAliasesManager.initialize(this);
-
         this.economy = getEconomyWrapper();
-        this.listingDao = new ItemListingYamlDao(this);
+        this.listingDao = itemListingDaoFactory();
         this.queryActions = new QueryActions(this);
         this.transactionActions = new TransactionActions(this);
         this.itemListingActions = new ItemListingActions(this);
@@ -75,6 +77,14 @@ public class AdminMarket extends JavaPlugin {
 
     public void setEconomyWrapper(EconomyWrapper economy) {
         this.economy = economy;
+    }
+
+    private ItemListingDao itemListingDaoFactory() {
+        if (this.getPluginConfig().getStorage().equals("sqlite")) {
+            return new ItemListingSqliteDao(this);
+        } else {
+            return new ItemListingYamlDao(this);
+        }
     }
 
     public void createDirectory() {

@@ -9,6 +9,8 @@ public interface AdminMarketConfig {
 
     boolean getUseFloatingPrices();
 
+    String getStorage();
+
     void setTreasuryAccount(String treasuryAccount);
 
     void setSalesTax(double salesTax);
@@ -16,4 +18,6 @@ public interface AdminMarketConfig {
     void setMaxPercentBasePrice(double maxPercentBasePrice);
 
     void setUseFloatingPrices(boolean useFloatingPrices);
+
+    void setStorage(String storage);
 }
