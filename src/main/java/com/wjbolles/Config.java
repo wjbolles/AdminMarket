@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -13,10 +13,12 @@ import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Config implements AdminMarketConfig {
+
     public static final String SETTING_TREASURY_ACCOUNT = "treasuryAccount";
     public static final String SETTING_SALES_TAX = "salesTax";
     public static final String SETTING_MAX_PERCENT_BASE_PRICE = "maxPercentBasePrice";
     public static final String SETTING_USE_FLOATING_PRICES = "useFloatingPrices";
+    public static final String SETTING_STORAGE = "storage";
 
     private JavaPlugin plugin;
 
@@ -53,6 +55,9 @@ public class Config implements AdminMarketConfig {
     }
 
     @Override
+    public String getStorage() { return getConfig().getString(SETTING_STORAGE); }
+
+    @Override
     public void setTreasuryAccount(String treasuryAccount) {
         getConfig().set(SETTING_TREASURY_ACCOUNT, treasuryAccount);
         plugin.saveConfig();
@@ -74,5 +79,11 @@ public class Config implements AdminMarketConfig {
     public void setUseFloatingPrices(boolean useFloatingPrices) {
         getConfig().set(SETTING_USE_FLOATING_PRICES, useFloatingPrices);
         plugin.saveConfig();
-    }   
+    }
+
+    @Override
+    public void setStorage(String storage) {
+        getConfig().set(SETTING_USE_FLOATING_PRICES, storage);
+        plugin.saveConfig();
+    }
 }

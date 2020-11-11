@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -11,7 +11,6 @@ package com.wjbolles.eco.model;
 import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.AdminMarketTest;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -21,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 public class ItemListingTest extends AdminMarketTest {
 
     private ItemListing listing;
-    private ItemStack stack = new ItemStack(Material.STONE, 1);
+    private Material material = Material.GRANITE;
     private AdminMarketConfig config = plugin.getPluginConfig();
 
     @Before
@@ -36,7 +35,7 @@ public class ItemListingTest extends AdminMarketTest {
         int amount = 30;
 
         // Act
-        listing = new ItemListing(stack,isInfinite, config);
+        listing = new ItemListing(material, isInfinite, config);
         listing.setInventory(amount);
         listing.removeInventory(10);
 
@@ -51,7 +50,7 @@ public class ItemListingTest extends AdminMarketTest {
         config.setUseFloatingPrices(true);
 
         // Act
-        listing = new ItemListing(stack, isInfinite, config);
+        listing = new ItemListing(material, isInfinite, config);
         Double price = 10.0;
         listing.setBasePrice(price);
 
@@ -65,10 +64,10 @@ public class ItemListingTest extends AdminMarketTest {
         // Hand calculated: 13.0888
         double expectedSellPrice = 13.0888;
         config.setUseFloatingPrices(true);
-        config.setMaxPercentBasePrice(1.33);
+        config.setMaxPercentBasePrice(0.33);
 
         // Act
-        listing = new ItemListing(stack,false, config);
+        listing = new ItemListing(material,false, config);
         listing.setInventory(64);
         Double price = 10.0;
         listing.setBasePrice(price);
@@ -79,9 +78,9 @@ public class ItemListingTest extends AdminMarketTest {
     }
 
     @Test
-    public void equlibriumFormulaWorks() throws Exception {
+    public void equilibriumFormulaWorks() throws Exception {
         config.setSalesTax(0.0);
-        listing = new ItemListing(stack,false, config);
+        listing = new ItemListing(material,false, config);
         listing.setBasePrice(10.0);
         listing.setValueAddedTax(0.0);
         listing.setInventory(1000);

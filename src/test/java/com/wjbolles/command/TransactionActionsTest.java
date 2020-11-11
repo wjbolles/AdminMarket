@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -57,10 +57,10 @@ public class TransactionActionsTest extends AdminMarketTest {
     public void testSellHandInfiniteListing() throws Exception {
 
         // Arrange
-        ItemStack stack = new ItemStack(Material.STONE, 1);
+        ItemStack stack = new ItemStack(Material.GRANITE, 1);
         inventory.setItemInMainHand(stack);
 
-        ItemListing itemListing = new ItemListing(stack, true, plugin.getPluginConfig());
+        ItemListing itemListing = new ItemListing(stack.getType(), true, plugin.getPluginConfig());
         itemListing.setBasePrice(10.0);
 
         doReturn(itemListing).when(listingDao).findItemListing(ArgumentMatchers.any());
@@ -89,8 +89,8 @@ public class TransactionActionsTest extends AdminMarketTest {
         // Economic stuff...
         when(config.getSalesTax()).thenReturn(0.0);
 
-        ItemStack stack = new ItemStack(Material.STONE, 1);
-        ItemListing itemListing = new ItemListing(stack, true, plugin.getPluginConfig());
+        ItemStack stack = new ItemStack(Material.GRANITE, 1);
+        ItemListing itemListing = new ItemListing(stack.getType(), true, plugin.getPluginConfig());
         itemListing.setBasePrice(10.0);
         itemListing.setInventory(1000);
         itemListing.setEquilibrium(1000);
@@ -102,7 +102,7 @@ public class TransactionActionsTest extends AdminMarketTest {
         plugin.setTransactionActions(new TransactionActions(plugin));
 
         inventory.setItemInMainHand(stack);
-        when(listingDao.findItemListing(ArgumentMatchers.any(ItemStack.class))).thenReturn(itemListing);
+        when(listingDao.findItemListing(ArgumentMatchers.any(Material.class))).thenReturn(itemListing);
 
         // Act
         plugin.getTransactionActions().sellHand(player);
@@ -124,8 +124,8 @@ public class TransactionActionsTest extends AdminMarketTest {
         // Economic stuff...
         when(config.getSalesTax()).thenReturn(0.0);
 
-        ItemStack stack = new ItemStack(Material.STONE, 64);
-        ItemListing itemListing = new ItemListing(stack, true, plugin.getPluginConfig());
+        ItemStack stack = new ItemStack(Material.GRANITE, 64);
+        ItemListing itemListing = new ItemListing(stack.getType(), true, plugin.getPluginConfig());
         itemListing.setBasePrice(10.0);
         itemListing.setInventory(1000);
         itemListing.setEquilibrium(1000);
@@ -137,7 +137,7 @@ public class TransactionActionsTest extends AdminMarketTest {
         plugin.setTransactionActions(new TransactionActions(plugin));
         inventory.setItemInMainHand(stack);
 
-        when(listingDao.findItemListing(ArgumentMatchers.any(ItemStack.class))).thenReturn(itemListing);
+        when(listingDao.findItemListing(ArgumentMatchers.any(Material.class))).thenReturn(itemListing);
 
         // Act
         plugin.getTransactionActions().sellHand(player);
@@ -159,8 +159,8 @@ public class TransactionActionsTest extends AdminMarketTest {
         // Economic stuff...
         when(config.getSalesTax()).thenReturn(0.0);
 
-        ItemStack stack = new ItemStack(Material.STONE, 64);
-        ItemListing itemListing = new ItemListing(stack, true, plugin.getPluginConfig());
+        ItemStack stack = new ItemStack(Material.GRANITE, 64);
+        ItemListing itemListing = new ItemListing(stack.getType(), true, plugin.getPluginConfig());
         itemListing.setBasePrice(10.0);
         itemListing.setInventory(1000);
         itemListing.setEquilibrium(1000);
@@ -174,7 +174,7 @@ public class TransactionActionsTest extends AdminMarketTest {
         inventory.setItem(0, stack);
         inventory.setItem(1, stack);
 
-        when(listingDao.findItemListing(ArgumentMatchers.any(ItemStack.class))).thenReturn(itemListing);
+        when(listingDao.findItemListing(ArgumentMatchers.any(Material.class))).thenReturn(itemListing);
 
         // Act
         plugin.getTransactionActions().sellAll(player);

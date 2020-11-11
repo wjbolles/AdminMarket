@@ -12,8 +12,10 @@ import java.util.logging.Logger;
 
 import com.wjbolles.AdminMarket;
 import com.wjbolles.adminmarket.utils.Consts;
+import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.model.ItemListing;
 
+import com.wjbolles.eco.model.ItemListingBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -83,20 +85,19 @@ public class ItemListingSqliteDao implements ItemListingDao {
             conn = DriverManager.getConnection(ItemListingSqliteDao.URL);
             statement = conn.createStatement();
             ResultSet rs = statement.executeQuery("select * from items");
-
             while (rs.next()) {
-                Material material = Material.getMaterial(rs.getString("material"));
-                ItemStack stack = new ItemStack(material, 1);
-                boolean isInfinite = rs.getInt("is_infinite") == 0 ? false : true;
+                Material material = CommandUtil.materialFactory(rs.getString("material"));
 
-                ItemListing listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
+                ItemListing listing = new ItemListingBuilder(material)
+                        .setInfinite(rs.getInt("is_infinite") == 0 ? false : true)
+                        .setInventory(rs.getInt("inventory"))
+                        .setValueAddedTax(rs.getFloat("vat"))
+                        .setBasePrice(rs.getFloat("base_price"))
+                        .setEquilibrium(rs.getInt("equilibrium"))
+                        .setConfig(plugin.getPluginConfig())
+                        .build();
 
-                listing.setBasePrice(rs.getFloat("base_price"));
-                listing.setInventory(rs.getInt("inventory"));
-                listing.setEquilibrium(rs.getInt("equilibrium"));
-                listing.setValueAddedTax(rs.getFloat("vat"));
-
-                listings.put(material.name(), listing);
+                listings.put(material.toString(), listing);
             }
 
         } catch (SQLException e) {
@@ -118,7 +119,7 @@ public class ItemListingSqliteDao implements ItemListingDao {
     }
 
     @Override
-    public ItemListing findItemListing(ItemStack stack) {
+    public ItemListing findItemListing(Material material) {
 
         ItemListing listing = null;
 
@@ -128,15 +129,16 @@ public class ItemListingSqliteDao implements ItemListingDao {
         try {
             conn = DriverManager.getConnection(ItemListingSqliteDao.URL);
             statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("select * from items where material =\"" + stack.getType().name()+"\"");
+            ResultSet rs = statement.executeQuery("select * from items where material =\"" + material.toString() +"\"");
 
-            Material material = Material.getMaterial(rs.getString("material"));
-            boolean isInfinite = rs.getInt("is_infinite") == 0 ? false : true;
-            listing = new ItemListing(stack, isInfinite, plugin.getPluginConfig());
-            listing.setBasePrice(rs.getFloat("base_price"));
-            listing.setInventory(rs.getInt("inventory"));
-            listing.setEquilibrium(rs.getInt("equilibrium"));
-            listing.setValueAddedTax(rs.getFloat("vat"));
+            listing = new ItemListingBuilder(material)
+                .setInfinite(rs.getInt("is_infinite") == 0 ? false : true)
+                .setInventory(rs.getInt("inventory"))
+                .setValueAddedTax(rs.getFloat("vat"))
+                .setBasePrice(rs.getFloat("base_price"))
+                .setEquilibrium(rs.getInt("equilibrium"))
+                .setConfig(plugin.getPluginConfig())
+                .build();
 
             return listing;
 
@@ -151,7 +153,6 @@ public class ItemListingSqliteDao implements ItemListingDao {
                     conn.close();
                 }
             } catch (SQLException e) {
-                // connection close failed.
                 System.err.println(e.getMessage());
             }
         }
@@ -170,7 +171,7 @@ public class ItemListingSqliteDao implements ItemListingDao {
             conn = DriverManager.getConnection(ItemListingSqliteDao.URL);
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, listing.getStack().getType().name());
+            pstmt.setString(1, listing.getMaterial().toString() );
             pstmt.setInt(2, listing.isInfinite() ? 1 : 0);
             pstmt.setInt(3, listing.getInventory());
             pstmt.setDouble(4, listing.getValueAddedTax());
@@ -188,8 +189,7 @@ public class ItemListingSqliteDao implements ItemListingDao {
                     conn.close();
                 }
             } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
+                throw e;
             }
         }
     }
@@ -216,7 +216,7 @@ public class ItemListingSqliteDao implements ItemListingDao {
             pstmt.setDouble(3, listing.getValueAddedTax());
             pstmt.setDouble(4, listing.getBasePrice());
             pstmt.setInt(5, listing.getEquilibrium());
-            pstmt.setString(6, listing.getStack().getType().name());
+            pstmt.setString(6, listing.getMaterial().toString());
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -230,8 +230,7 @@ public class ItemListingSqliteDao implements ItemListingDao {
                     conn.close();
                 }
             } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
+                throw e;
             }
         }
     }
@@ -247,7 +246,7 @@ public class ItemListingSqliteDao implements ItemListingDao {
             conn = DriverManager.getConnection(ItemListingSqliteDao.URL);
             pstmt = conn.prepareStatement(sql);
 
-            pstmt.setString(1, listing.getStack().getType().name());
+            pstmt.setString(1, listing.getMaterial().toString());
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -261,10 +260,8 @@ public class ItemListingSqliteDao implements ItemListingDao {
                     conn.close();
                 }
             } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e.getMessage());
+                throw e;
             }
         }
     }
-
 }

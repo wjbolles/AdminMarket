@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -14,6 +14,7 @@ import com.wjbolles.command.actions.QueryActions;
 import com.wjbolles.command.actions.TransactionActions;
 import net.md_5.bungee.api.ChatColor;
 
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -107,11 +108,11 @@ public class ShopCommandExecutor implements CommandExecutor {
         }
 
         if(args.length != 3) {
-            sender.sendMessage("Usage: /shop sell <type> <number>");
+            sender.sendMessage("Usage: /shop buy <type> <number>");
             return true;
         }
         
-        ItemStack stack = CommandUtil.parseItemStack(args[1]);
+        Material material = CommandUtil.materialFactory(args[1]);
         int amount;
         
         try {
@@ -121,13 +122,13 @@ public class ShopCommandExecutor implements CommandExecutor {
             return false;
         }
         
-        if (stack == null) {
+        if (material == null) {
             sender.sendMessage(ChatColor.RED + "Item not recognized!");
             return false;
         }
 
         try {
-            transactionActions.buyItems((Player) sender, stack, amount);
+            transactionActions.buyItems((Player) sender, material, amount);
         }catch (Exception e) {
             e.printStackTrace();
             sender.sendMessage("An unexpected error occurred");

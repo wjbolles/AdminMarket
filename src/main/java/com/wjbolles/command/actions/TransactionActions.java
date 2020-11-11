@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -14,6 +14,7 @@ import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import com.wjbolles.eco.model.ItemListing;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -42,10 +43,9 @@ public class TransactionActions {
         this.df.setGroupingSize(3);
     }
 
-    // Note: This stack should have an amount of 1.
-    public void buyItems(Player player, ItemStack stack, int amount) throws Exception {
+    public void buyItems(Player player, Material material, int amount) throws Exception {
 
-        ItemListing listing = listingDao.findItemListing(stack);
+        ItemListing listing = listingDao.findItemListing(material);
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
@@ -71,7 +71,7 @@ public class TransactionActions {
         // Working with inventories is difficult. It's easier to just add them
         // one at a time
         // and check if we've run out of room than parse the inventory first.
-        ItemStack individualItem = new ItemStack(stack.getType(), 1);
+        ItemStack individualItem = new ItemStack(material, 1);
 
         int amountPurchased;
         for (amountPurchased = 0; amountPurchased < amount; amountPurchased++) {
@@ -105,7 +105,7 @@ public class TransactionActions {
         );
         
         if (!listing.isInfinite()) {
-            notifyPriceChange(stack, originalPrice, listing.getBuyPrice());
+            notifyPriceChange(material, originalPrice, listing.getBuyPrice());
         }
 
         listingDao.updateItemListing(listing);
@@ -114,8 +114,9 @@ public class TransactionActions {
     public void sellHand(Player player) throws Exception {
         ItemStack hand = player.getInventory().getItemInMainHand();
         ItemStack stack = new ItemStack(hand.getType(), 1);
+        Material material = stack.getType();
 
-        ItemListing listing = listingDao.findItemListing(stack);
+        ItemListing listing = listingDao.findItemListing(material);
 
         if (listing == null || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
             player.sendMessage("This item is not in the shop.");
@@ -144,13 +145,13 @@ public class TransactionActions {
         player.sendMessage("Sold for: " + ChatColor.GREEN + "+$" + df.format(totalCost));
         
         if (!listing.isInfinite()) {
-            notifyPriceChange(stack, originalPrice, listing.getSellPrice());
+            notifyPriceChange(material, originalPrice, listing.getSellPrice());
         }
         listingDao.updateItemListing(listing);
     }
 
-    private void notifyPriceChange(ItemStack stack, double originalPrice, double basePrice) {
-        String label = stack.getType().name();
+    private void notifyPriceChange(Material material, double originalPrice, double basePrice) {
+        String label = material.toString();
         
         double difference = basePrice - originalPrice;
         String msg;
@@ -179,10 +180,8 @@ public class TransactionActions {
             }
             
             double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
-            
-            // The key for this assumes the stack has an amount of 1
-            // TODO: probably should enforce that requirement with another method
-            ItemListing listing = listingDao.findItemListing(new ItemStack(stack.getType(), 1));
+
+            ItemListing listing = listingDao.findItemListing(stack.getType());
             
             if (listing == null || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
                 continue;
@@ -195,8 +194,7 @@ public class TransactionActions {
                     player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
                     break;
                 } else {
-                    //TODO remove this hardcode
-                    economyWrapper.withdraw("towny-server", subTotal);
+                    economyWrapper.withdraw(plugin.getPluginConfig().getTreasuryAccount(), subTotal);
                 }
 
                 listing.addInventory(stack.getAmount());
@@ -213,7 +211,7 @@ public class TransactionActions {
     }
 
     public void sellItem(Player player, ItemStack stack, int amount) {
-        ItemListing listing = listingDao.findItemListing(stack);
+        ItemListing listing = listingDao.findItemListing(stack.getType());
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
@@ -263,7 +261,7 @@ public class TransactionActions {
                 + df.format(totalSold));
         
         if (!listing.isInfinite()) {
-            notifyPriceChange(stack, originalPrice, listing.getSellPrice());
+            notifyPriceChange(stack.getType(), originalPrice, listing.getSellPrice());
         }
     }
 }

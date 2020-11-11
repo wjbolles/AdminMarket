@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -13,7 +13,6 @@ import com.wjbolles.AdminMarketTest;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -28,7 +27,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
     YamlConfiguration yamlConf;
     String correctFileName;
     ItemListing listing;
-    ItemStack stack = new ItemStack(Material.STONE, 1);
+    Material material = Material.GRANITE;
 
     int amount = 30;
 
@@ -40,12 +39,12 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
     private void arrangeInsert() throws Exception {
         // Conf file
         yamlConf = new YamlConfiguration();
-        correctFileName = stack.getType()+".yml";
+        correctFileName = material.toString()+".yml";
 
         // Listing
         AdminMarketConfig config = plugin.getPluginConfig();
         config.setUseFloatingPrices(true);
-        listing = new ItemListing(stack,true, config);
+        listing = new ItemListing(material,true, config);
     }
 
     @Test
@@ -54,7 +53,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         plugin.getListingDao().insertItemListing(listing);
 
-        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -69,7 +68,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         plugin.getListingDao().insertItemListing(listing);
 
-        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -94,7 +93,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         yamlConf.load(generatedConf);
         assertEquals("Material in YAML should match what was stored",
-                listing.getStack().getType().toString(), yamlConf.get("material"));
+                listing.getMaterial().toString(), yamlConf.get("material"));
         assertEquals("Infinite in YAML should match what was stored",
                 true, yamlConf.get("isInfinite"));
         assertEquals("Inventory in YAML should match what was stored",
@@ -112,7 +111,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         arrangeInsert();
 
         plugin.getListingDao().insertItemListing(listing);
-        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is retrievable", listing, plugin.getListingDao().findItemListing(material));
 
         listing.setInfinite(false);
         listing.setInventory(10);
@@ -122,7 +121,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         plugin.getListingDao().updateItemListing(listing);
 
-        assertEquals("Verify listing is was updated", listing, plugin.getListingDao().findItemListing(stack));
+        assertEquals("Verify listing is was updated", listing, plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -145,7 +144,7 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
 
         yamlConf.load(generatedConf);
         assertEquals("Material in YAML should match what was stored",
-                listing.getStack().getType().toString(), yamlConf.get("material"));
+                listing.getMaterial().toString(), yamlConf.get("material"));
         assertEquals("Infinite in YAML should match what was stored",
                 false, yamlConf.get("isInfinite"));
         assertEquals("Inventory in YAML should match what was stored",
@@ -163,11 +162,11 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         arrangeInsert();
 
         plugin.getListingDao().insertItemListing(listing);
-        assertEquals("Item should have been added to the stack", stack, listing.getStack());
+        assertEquals("Item should have been added to the stack", material, listing.getMaterial());
 
         plugin.getListingDao().deleteItemListing(listing);
 
-        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(stack));
+        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(material));
     }
 
     @Test
@@ -175,12 +174,12 @@ public class ItemListingDaoYamlTest extends AdminMarketTest {
         arrangeInsert();
 
         plugin.getListingDao().insertItemListing(listing);
-        assertEquals("Item should have been added to the stack", stack, listing.getStack());
+        assertEquals("Item should have been added to listings", material, listing.getMaterial());
         File conf = ((ItemListingYamlDao) plugin.getListingDao()).getListingConfFile(listing);
         assertTrue("Verify the file was written", conf.exists());
 
         plugin.getListingDao().deleteItemListing(listing);
-        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(stack));
+        assertNull("Item should no longer be present", plugin.getListingDao().findItemListing(material));
         assertFalse("Verify the file was removed", conf.exists());
     }
 }

@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -41,7 +41,7 @@ public class InventoryFakeTest extends AdminMarketTest {
     @Test
     public void testInsertSingleItem() {
         // Arrange
-        ItemStack stack = new ItemStack(Material.STONE, 1, (short) 1);
+        ItemStack stack = new ItemStack(Material.GRANITE, 1, (short) 1);
 
         // Act
         player.getInventory().addItem(stack);
@@ -73,7 +73,7 @@ public class InventoryFakeTest extends AdminMarketTest {
         }
         
         // Should return a hashmap because no slots match
-        assertFalse(player.getInventory().addItem(new ItemStack(Material.STONE, 1, (short) 1)).isEmpty());
+        assertFalse(player.getInventory().addItem(new ItemStack(Material.GRANITE, 1, (short) 1)).isEmpty());
     }
     
     @Test
@@ -81,14 +81,14 @@ public class InventoryFakeTest extends AdminMarketTest {
         ItemStack[] stack = new ItemStack[inventory.getSize()];
         
         for(int i = 0; i < stack.length-1; i++) {
-            stack[i] = new ItemStack(Material.STONE, 64, (short) 1);
+            stack[i] = new ItemStack(Material.GRANITE, 64, (short) 1);
             player.getInventory().addItem(stack[i]);
         }
         
         // Clear last slot for next test
-        assertTrue(player.getInventory().addItem(new ItemStack(Material.STONE, 63, (short) 1)).isEmpty());
-        assertTrue(player.getInventory().addItem(new ItemStack(Material.STONE, 1, (short) 1)).isEmpty());
-        assertFalse(player.getInventory().addItem(new ItemStack(Material.STONE, 1, (short) 1)).isEmpty());
+        assertTrue(player.getInventory().addItem(new ItemStack(Material.GRANITE, 63, (short) 1)).isEmpty());
+        assertTrue(player.getInventory().addItem(new ItemStack(Material.GRANITE, 1, (short) 1)).isEmpty());
+        assertFalse(player.getInventory().addItem(new ItemStack(Material.GRANITE, 1, (short) 1)).isEmpty());
     }
 }
 */

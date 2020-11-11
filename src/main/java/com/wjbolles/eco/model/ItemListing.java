@@ -1,7 +1,7 @@
 /*
  * AdminMarket
  *
- * Copyright 2017 by Walter Bolles <mail@wjbolles.com>
+ * Copyright 2020 by Walter Bolles <mail@wjbolles.com>
  *
  * Licensed under the Apache License, Version 2.0
  */
@@ -10,7 +10,7 @@ package com.wjbolles.eco.model;
 
 import com.wjbolles.AdminMarketConfig;
 
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.Material;
 
 public class ItemListing {
 
@@ -19,26 +19,37 @@ public class ItemListing {
     private static final int DEFAULT_VALUE_ADDED_TAX = 0;
     private static final int DEFAULT_INVENTORY = 0;
 
-    private final ItemStack stack;
+    private final Material material;
     private boolean isInfinite;
     private int inventory;
     private double basePrice;
     private double valueAddedTax;
     private int equilibrium;
-    private AdminMarketConfig config;
+    private final AdminMarketConfig config;
 
-    /**
-     * @param stack
-     * @param isInfinite
-     * @param config
-     */
-    public ItemListing(ItemStack stack, boolean isInfinite, AdminMarketConfig config) {
-        this.stack = stack;
+    public ItemListing(Material material, boolean isInfinite, AdminMarketConfig config) {
+        this.material = material;
         this.isInfinite = isInfinite;
         this.basePrice = DEFAULT_BASE_PRICE;
         this.inventory = DEFAULT_INVENTORY;
         this.valueAddedTax = DEFAULT_VALUE_ADDED_TAX;
         this.equilibrium = DEFAULT_EQUILIBRIUM;
+        this.config = config;
+    }
+
+    protected ItemListing(Material material,
+                       boolean isInfinite,
+                       double basePrice,
+                       int inventory,
+                       double valueAddedTax,
+                       int equilibrium,
+                       AdminMarketConfig config) {
+        this.material = material;
+        this.isInfinite = isInfinite;
+        this.basePrice = basePrice;
+        this.inventory = inventory;
+        this.valueAddedTax = valueAddedTax;
+        this.equilibrium = equilibrium;
         this.config = config;
     }
 
@@ -50,15 +61,8 @@ public class ItemListing {
         this.valueAddedTax = valueAddedTax;
     }
 
-    public boolean buyItem(int amount) {
-        if (isInfinite) {
-            return true;
-        } else if (amount < inventory) {
-            inventory -= amount;
-            return true;
-        }
-
-        return false;
+    public String getMaterialAsString(){
+        return material.toString();
     }
 
     public boolean isInfinite() {
@@ -94,10 +98,13 @@ public class ItemListing {
 
     private double getSellPrice(int inventory) {
         if(config.getUseFloatingPrices() && !isInfinite) {
-            double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/ -equilibrium;
-            double sellPrice = basePrice * config.getMaxPercentBasePrice() - slope * inventory;
-            if (sellPrice < basePrice * 0.40) {
-                sellPrice = basePrice * 0.40;
+            double slope = (basePrice - basePrice * (1+config.getMaxPercentBasePrice()))/ -equilibrium;
+            double sellPrice = basePrice * (1+config.getMaxPercentBasePrice()) - slope * inventory;
+
+            double floor = basePrice - basePrice*config.getMaxPercentBasePrice();
+
+            if (sellPrice < floor) {
+                sellPrice = floor;
             }
             return sellPrice;
         } else {
@@ -110,19 +117,9 @@ public class ItemListing {
     }
 
     private double getBuyPrice(int inventory) {
-        double buyPrice;
-
-        if(config.getUseFloatingPrices() && !isInfinite) {
-            double slope = (basePrice - basePrice * config.getMaxPercentBasePrice())/ -equilibrium;
-            buyPrice = basePrice * config.getMaxPercentBasePrice() - slope * inventory;
-            if (buyPrice < basePrice * 0.40) {
-                buyPrice = basePrice * 0.40;
-            }
-        } else {
-            buyPrice = basePrice;
-        }
+        double buyPrice = getSellPrice(inventory);
         buyPrice = buyPrice + buyPrice * config.getSalesTax();
-        buyPrice = buyPrice + buyPrice * valueAddedTax;
+        buyPrice = buyPrice + valueAddedTax;
         return buyPrice;
     }
 
@@ -134,8 +131,8 @@ public class ItemListing {
         this.basePrice = basePrice;
     }
 
-    public ItemStack getStack() {
-        return stack;
+    public Material getMaterial() {
+        return material;
     }
 
     public int getEquilibrium() {
@@ -185,7 +182,7 @@ public class ItemListing {
     public int hashCode() {
         int result;
         long temp;
-        result = stack.hashCode();
+        result = material.hashCode();
         result = 31 * result + (isInfinite ? 1 : 0);
         result = 31 * result + inventory;
         temp = Double.doubleToLongBits(basePrice);
@@ -208,13 +205,13 @@ public class ItemListing {
         if (Double.compare(that.basePrice, basePrice) != 0) return false;
         if (Double.compare(that.valueAddedTax, valueAddedTax) != 0) return false;
         if (equilibrium != that.equilibrium) return false;
-        return stack.equals(that.stack);
+        return material.equals(that.material);
     }
 
     @Override
     public String toString() {
         return "ItemListing{" +
-                "stack=" + stack.getType().name() +
+                "material=" + material.toString() +
                 ", isInfinite=" + isInfinite +
                 ", inventory=" + inventory +
                 ", basePrice=" + basePrice +
