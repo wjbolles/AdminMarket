@@ -24,17 +24,15 @@ import java.text.DecimalFormat;
 // import java.util.logging.Logger;
 
 public class TransactionActions {
-    private AdminMarket plugin;
+    private final AdminMarket plugin;
     //private Logger log;
     private final DecimalFormat df = new DecimalFormat("#.00");
-    private ItemListingDao listingDao;
-    private EconomyWrapper economyWrapper;
-    private Server server;
+    private final ItemListingDao listingDao;
+    private final EconomyWrapper economyWrapper;
+    private final Server server;
 
     public TransactionActions(AdminMarket plugin) {
         this.plugin = plugin;
-        // QueryActions queryActions = plugin.getQueryActions();
-        // this.log = plugin.getLog();
         this.listingDao = plugin.getListingDao();
         this.economyWrapper = plugin.getEconomyWrapper();
         this.server = plugin.getServer();
@@ -43,38 +41,33 @@ public class TransactionActions {
         this.df.setGroupingSize(3);
     }
 
-    public void buyItems(Player player, Material material, int amount) throws Exception {
-
-        ItemListing listing = listingDao.findItemListing(material);
-
+    private boolean transactionPermitted(Player player, ItemListing listing, int amount) {
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
-            return;
+            return false;
         }
 
         if (!listing.isInfinite() && listing.getInventory() == 0) {
             player.sendMessage(ChatColor.RED + "This item is out of stock.");
-            return;
+            return false;
         }
 
         double playerBalance = economyWrapper.getBalance(player);
         if (playerBalance < listing.getTotalBuyPrice(amount)) {
             player.sendMessage(ChatColor.RED + "You cannot afford this item.");
-            return;
+            return false;
         }
+        return true;
+    }
 
-        // Don't oversell the inventory
-        if (!listing.isInfinite() && listing.getInventory() < amount) {
-            amount = listing.getInventory();
-        }
-
+    private int updatePlayerInventoryWithPurchase(Player player, ItemListing listing, int amount){
         // Working with inventories is difficult. It's easier to just add them
         // one at a time
         // and check if we've run out of room than parse the inventory first.
-        ItemStack individualItem = new ItemStack(material, 1);
+        ItemStack individualItem = new ItemStack(listing.getMaterial(), 1);
 
-        int amountPurchased;
-        for (amountPurchased = 0; amountPurchased < amount; amountPurchased++) {
+        int amountActuallyPurchased;
+        for (amountActuallyPurchased = 0; amountActuallyPurchased < amount; amountActuallyPurchased++) {
             // If it is not empty, it ran out of space and was unable to add
             // anymore.
             // Use the amount purchased to adjust the inventory and charge the
@@ -83,38 +76,54 @@ public class TransactionActions {
                 break;
             }
         }
+        return amountActuallyPurchased;
+    }
 
-        if (amountPurchased == 0) {
+    public void buyItems(Player player, Material material, int requestedAmount) throws Exception {
+        ItemListing listing = listingDao.findItemListing(material);
+        if(!transactionPermitted(player, listing, requestedAmount)) { return; }
+
+        // Don't oversell the inventory
+        if (!listing.isInfinite() && listing.getInventory() < requestedAmount) {
+            requestedAmount = listing.getInventory();
+        }
+
+        int amountActuallyPurchased = updatePlayerInventoryWithPurchase(player, listing, requestedAmount);
+        if (amountActuallyPurchased == 0) {
             player.sendMessage(ChatColor.RED  + "There is no room in your inventory!");
             return;
         }
         
-        double totalCost = listing.getTotalBuyPrice(amountPurchased);
-        double originalPrice = listing.getBuyPrice();
-        if (!listing.isInfinite()) {
-            listing.removeInventory(amountPurchased);
+        double subTotal = listing.getTotalBuyPrice(amountActuallyPurchased);
+        if (!listing.isInfinite()) { // Don't remove inventory until the full price is assessed
+            listing.removeInventory(amountActuallyPurchased);
         }
+        double salesTax = subTotal * plugin.getPluginConfig().getSalesTax();
+        double valueAddedTax = listing.getValueAddedTax() * amountActuallyPurchased;
+        double totalCost = subTotal + salesTax + valueAddedTax;
 
+        String treasury = plugin.getPluginConfig().getTreasuryAccount();
         economyWrapper.withdraw(player, totalCost);
-        economyWrapper.deposit(plugin.getPluginConfig().getTreasuryAccount(), totalCost);
+        economyWrapper.deposit(treasury, totalCost);
         
         player.sendMessage(
-            "Purchased: " + amountPurchased + " for: "
-            + ChatColor.RED + "-$"
-            + df.format(amountPurchased * listing.getBuyPrice())
+            ChatColor.GRAY + listing.getMaterialAsString() + ChatColor.WHITE +
+                " Purchased: " + ChatColor.BLUE + amountActuallyPurchased + ChatColor.WHITE +
+                " Subtotal: "  + ChatColor.RED + "$" + df.format(subTotal)
         );
-        
-        if (!listing.isInfinite()) {
-            notifyPriceChange(material, originalPrice, listing.getBuyPrice());
-        }
+        player.sendMessage(
+                "Sales Tax: "+ ChatColor.RED +"$" + df.format(salesTax) + ChatColor.WHITE + " " +
+                "VAT: "+ ChatColor.RED +"$" + df.format(valueAddedTax));
+        player.sendMessage(
+                "Total: "+ ChatColor.RED +"$" + df.format(totalCost)
+        );
 
         listingDao.updateItemListing(listing);
     }
 
     public void sellHand(Player player) throws Exception {
         ItemStack hand = player.getInventory().getItemInMainHand();
-        ItemStack stack = new ItemStack(hand.getType(), 1);
-        Material material = stack.getType();
+        Material material = hand.getType();
 
         ItemListing listing = listingDao.findItemListing(material);
 
@@ -126,7 +135,7 @@ public class TransactionActions {
         double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
         double totalCost = listing.getTotalSellPrice(hand.getAmount());
         double originalPrice = listing.getSellPrice();
-        
+
         if (!listing.isInfinite()) {
             if (serverBalance < totalCost) {
                 player.sendMessage(ChatColor.RED + "The server treasury cannot afford this transaction.");
@@ -166,19 +175,18 @@ public class TransactionActions {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public void sellAll(Player player) throws Exception {
 
         PlayerInventory inventory = player.getInventory();
         
         double totalSold = 0;
-        
+
         for(int i = 0; i < inventory.getSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack == null) {
                 continue;
             }
-            
+
             double serverBalance = economyWrapper.getBalance(plugin.getPluginConfig().getTreasuryAccount());
 
             ItemListing listing = listingDao.findItemListing(stack.getType());
@@ -210,8 +218,8 @@ public class TransactionActions {
         player.sendMessage("Sold for: " + ChatColor.GREEN + "+$" + df.format(totalSold));
     }
 
-    public void sellItem(Player player, ItemStack stack, int amount) {
-        ItemListing listing = listingDao.findItemListing(stack.getType());
+    public void sellItem(Player player, Material material, int amount) {
+        ItemListing listing = listingDao.findItemListing(material);
 
         if (listing == null) {
             player.sendMessage(ChatColor.RED + "This item is not in the shop.");
@@ -230,7 +238,7 @@ public class TransactionActions {
 
         // Working with inventories is difficult. It's easier to just remove them
         // one at a time
-        ItemStack individualItem = new ItemStack(stack.getType(), 1);
+        ItemStack individualItem = new ItemStack(material, 1);
 
         int amountSold;
         for (amountSold = 0; amountSold < amount; amountSold++) {
@@ -261,7 +269,7 @@ public class TransactionActions {
                 + df.format(totalSold));
         
         if (!listing.isInfinite()) {
-            notifyPriceChange(stack.getType(), originalPrice, listing.getSellPrice());
+            notifyPriceChange(material, originalPrice, listing.getSellPrice());
         }
     }
 }

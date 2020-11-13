@@ -12,7 +12,7 @@ import com.wjbolles.AdminMarketConfig;
 import com.wjbolles.AdminMarketTest;
 import com.wjbolles.command.actions.TransactionActions;
 import com.wjbolles.eco.dao.ItemListingDao;
-import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
+import com.wjbolles.eco.economy.BasicEconomyWrapper;
 import com.wjbolles.eco.economy.EconomyWrapper;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
@@ -49,7 +49,7 @@ public class TransactionActionsTest extends AdminMarketTest {
         doReturn("towny-server").when(config).getTreasuryAccount();
         accounts.put("towny-server", 10000.0);
         accounts.put("ANY_PLAYER", 10000.0);
-        economy = new BasicEconomyWrapperImpl(accounts);
+        economy = new BasicEconomyWrapper(accounts);
         plugin.setEconomyWrapper(economy);
     }
 

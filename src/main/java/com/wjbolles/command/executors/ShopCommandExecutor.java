@@ -20,11 +20,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class ShopCommandExecutor implements CommandExecutor {
-    private QueryActions queryActions;
-    private TransactionActions transactionActions;
+    private final QueryActions queryActions;
+    private final TransactionActions transactionActions;
 
     public ShopCommandExecutor(AdminMarket plugin) {
         this.queryActions = plugin.getQueryActions();
@@ -33,106 +32,100 @@ public class ShopCommandExecutor implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         try {
-            if (args[0].equalsIgnoreCase("buy")) {
-                return buyCommand(sender, args);
-            } else if (args[0].equalsIgnoreCase("sell")) {
-                return sellCommand(sender, args);
-            } else if (args[0].equalsIgnoreCase("list")) {
-                return queryActions.listCommand(sender, args);
-            } else if (args[0].equalsIgnoreCase("price")) {
-                return queryActions.priceCommand(sender, args);
+            switch(args[0].toLowerCase()) {
+                case "buy":
+                    return buyCommand(sender, args);
+                case "sell":
+                    return sellCommand(sender, args);
+                case "list":
+                    return queryActions.listCommand(sender, args);
+                case "quote":
+                    return queryActions.quoteCommand(sender, args);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             sender.sendMessage("Command not recognized!");
+        } catch (Exception e) {
+            sender.sendMessage("An unexpected error has occurred.");
+            e.printStackTrace();
         }
         return false;
     }
 
-    private boolean sellCommand(CommandSender sender, String[] args) {
-        if(sender instanceof ConsoleCommandSender){
+    private boolean sellCommand(CommandSender sender, String[] args) throws Exception {
+        if(sender instanceof ConsoleCommandSender){ // Console has nothing to sell
             sender.sendMessage(ChatColor.RED + "Only players can do this command!");
-            return false;
+            return true;
         }
-
-        try {
-            if(args.length < 2 || args.length > 3) {
-                sender.sendMessage("Usage: /shop sell [hand|all|<type> <number>]");
-                return true;
-            }
-            if (args[1].equalsIgnoreCase("hand")) {
-                if(args.length != 2) {
-                    sender.sendMessage("Usage: /shop sell hand");
-                }
+    /*
+     * sellCommand Input Validation
+     */
+        if(args.length < 2 || args.length > 3) {
+            sender.sendMessage("Usage: /shop sell [hand|all|<type> <number>]");
+            return true;
+        }
+    /*
+     * sellCommand Execution
+     */
+        switch(args[1].toLowerCase()) {
+            case "hand":
+                if(args.length != 2) { sender.sendMessage("Usage: /shop sell hand"); }
                 transactionActions.sellHand((Player) sender);
-                return true;
-            } else if (args[1].equalsIgnoreCase("all")) {
-                if(args.length != 2) {
-                    sender.sendMessage("Usage: /shop sell all");
-                }
+                break;
+            case "all":
+                if(args.length != 2) { sender.sendMessage("Usage: /shop sell all"); }
                 transactionActions.sellAll((Player) sender);
-                return true;
-            } else {
-                if(args.length != 3) {
-                    sender.sendMessage("Usage: /shop sell <type> <number>");
-                    return true;
-                }
-                ItemStack stack = CommandUtil.parseItemStack(args[1]);
-                int amount;
-
-                try {
-                    amount = Integer.parseInt(args[2]);
-                } catch (Exception e) {
-                    sender.sendMessage(ChatColor.RED + "Amount not recognized!");
-                    return false;
-                }
-
-                if (stack == null) {
-                    sender.sendMessage(ChatColor.RED + "Item not recognized!");
-                    return false;
-                }
-                transactionActions.sellItem((Player) sender, stack, amount);
-                return true;
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            sender.sendMessage("An unexpected error occurred");
+                break;
+            default:
+                if(args.length != 3) { sender.sendMessage("Usage: /shop sell <type> <number>");}
+                return sellMaterialCommand(sender, args);
         }
         return true;
     }
 
-    private boolean buyCommand(CommandSender sender, String[] args) {
-        if(sender instanceof ConsoleCommandSender){
-            sender.sendMessage(ChatColor.RED + "Only players can do this command!");
-            return false;
-        }
-
-        if(args.length != 3) {
-            sender.sendMessage("Usage: /shop buy <type> <number>");
-            return true;
-        }
-        
+    private boolean sellMaterialCommand(CommandSender sender, String[] args){
         Material material = CommandUtil.materialFactory(args[1]);
         int amount;
-        
+    /*
+     * sellMaterialCommand Input Validation
+     */
+        if (material == null) { sender.sendMessage(ChatColor.RED + "Item not recognized!"); return false; }
         try {
             amount = Integer.parseInt(args[2]);
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Amount not recognized!");
             return false;
         }
-        
-        if (material == null) {
-            sender.sendMessage(ChatColor.RED + "Item not recognized!");
+    /*
+     * sellMaterialCommand Execution
+     */
+        transactionActions.sellItem((Player) sender, material, amount);
+        return true;
+    }
+
+    private boolean buyCommand(CommandSender sender, String[] args) throws Exception {
+        if(sender instanceof ConsoleCommandSender){
+            sender.sendMessage(ChatColor.RED + "Only players can do this command!");
             return false;
         }
 
+        Material material = CommandUtil.materialFactory(args[1]);
+        int amount;
+    /*
+     * buyCommand Input Validation
+     */
+        if(args.length != 3) { sender.sendMessage("Usage: /shop buy <type> <number>"); return true; }
+        if(material == null) { sender.sendMessage(ChatColor.RED + "Item not recognized!"); return false; }
         try {
-            transactionActions.buyItems((Player) sender, material, amount);
-        }catch (Exception e) {
-            e.printStackTrace();
-            sender.sendMessage("An unexpected error occurred");
+            amount = Integer.parseInt(args[2]);
+        } catch (Exception e) {
+            sender.sendMessage(ChatColor.RED + "Amount not recognized!");
+            return false;
         }
+    /*
+     * buyCommand Execution
+     */
+        transactionActions.buyItems((Player) sender, material, amount);
+
         return true;
     }
 }

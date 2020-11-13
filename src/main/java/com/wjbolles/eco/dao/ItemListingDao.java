@@ -2,7 +2,6 @@ package com.wjbolles.eco.dao;
 
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 
@@ -13,4 +12,5 @@ public interface ItemListingDao {
     void insertItemListing(ItemListing listing) throws Exception;
     void updateItemListing(ItemListing listing) throws Exception;
     void deleteItemListing(ItemListing listing) throws Exception;
+    boolean listingExists(Material material);
 }

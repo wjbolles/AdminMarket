@@ -12,11 +12,11 @@ import java.util.HashMap;
 
 import org.bukkit.OfflinePlayer;
 
-public class BasicEconomyWrapperImpl implements EconomyWrapper {
+public class BasicEconomyWrapper implements EconomyWrapper {
     
-    private HashMap<String, Double> accounts;
+    private final HashMap<String, Double> accounts;
     
-    public BasicEconomyWrapperImpl(HashMap<String, Double> accounts) {
+    public BasicEconomyWrapper(HashMap<String, Double> accounts) {
         this.accounts = accounts;
     }
 

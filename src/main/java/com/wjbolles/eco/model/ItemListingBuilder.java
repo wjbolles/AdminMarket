@@ -5,7 +5,7 @@ import org.bukkit.Material;
 
 public class ItemListingBuilder {
 
-    private Material material;
+    private final Material material;
     private boolean isInfinite;
     private int inventory;
     private double basePrice;

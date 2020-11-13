@@ -20,14 +20,14 @@ import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.ChatPaginator;
 import org.bukkit.util.ChatPaginator.ChatPage;
 
 public class QueryActions {
-    private AdminMarket plugin;
-    private DecimalFormat df = new DecimalFormat("#.00");
-    private ItemListingDao listingDao;
+    private final AdminMarket plugin;
+    private final DecimalFormat df = new DecimalFormat("#.00");
+    private final ItemListingDao listingDao;
+
     public QueryActions(AdminMarket plugin) {
         this.plugin = plugin;
         listingDao = plugin.getListingDao();
@@ -36,64 +36,91 @@ public class QueryActions {
         df.setGroupingSize(3);
     }
 
+    private Comparator<ItemListing> comparatorFactory(String sortBy) {
+        if(sortBy.equalsIgnoreCase("abc")){
+            return Comparator.comparing(ItemListing::getMaterialAsString)
+                    .thenComparing(ItemListing::getMaterialAsString);
+        } else {
+            return Comparator.comparing(ItemListing::getBuyPrice)
+                    .thenComparing(ItemListing::getBuyPrice);
+        }
+    }
+
     private List<ItemListing> getListings(String sortBy, String sortOrder){
         Map<String, ItemListing> listings = listingDao.getAllListings();
 
-        Comparator<ItemListing> compareBy = null;
-
-        if(sortBy.equals("abc")){
-            compareBy = Comparator.comparing(ItemListing::getMaterialAsString)
-                    .thenComparing(ItemListing::getMaterialAsString);
-        } else { // price
-            compareBy = Comparator.comparing(ItemListing::getBuyPrice)
-                    .thenComparing(ItemListing::getBuyPrice);
-        }
-
+        Comparator<ItemListing> compareBy = comparatorFactory(sortBy);
         List<ItemListing> sortedListings = listings.values().stream()
                 .sorted(compareBy)
-                .collect(Collectors.toList()); // asc
-
+                .collect(Collectors.toList());
         if(sortOrder.equals("desc")){
             Collections.reverse(sortedListings);
         }
-int a = 0;
         return sortedListings;
     }
 
+    private double getTotalCost(ItemListing listing, int amount){
+        double total = listing.getTotalBuyPrice(amount);
+        total += total * plugin.getPluginConfig().getSalesTax();
+        total += listing.getValueAddedTax();
+        return total;
+    }
+
     private void buildBuyPrice(StringBuilder sb, ItemListing listing){
-        sb.append(ChatColor.GRAY).append(listing.getMaterialAsString());
         if (CommandUtil.safeDoubleEqualsZero(listing.getBuyPrice())) {
             sb.append(ChatColor.WHITE).append(" B: n/a");
         } else {
-            if (listing.isInfinite() ||
-                    !plugin.getPluginConfig().getUseFloatingPrices() ||
-                    CommandUtil.safeDoubleEqualsZero(listing.getBuyPrice()-listing.getBasePrice())) {
-                sb.append(ChatColor.WHITE).append(" B: -$").append(df.format(listing.getBuyPrice()));
-            } else if (listing.getBuyPrice() < listing.getBasePrice()) {
-                sb.append(ChatColor.GREEN).append(" B: -$").append(df.format(listing.getBuyPrice()));
+            if (listing.isInfinite()) {
+                sb.append(ChatColor.WHITE).append("B: -$").append(df.format(listing.getBuyPrice()));
             } else {
-                sb.append(ChatColor.RED).append(" B: -$").append(df.format(listing.getBuyPrice()));
+                double total = getTotalCost(listing,1);
+                if(listing.getInventory() != 0) {
+                    // Individual Item Column
+                    if (listing.getInventory() == 0) {
+                        sb.append(ChatColor.RED).append("Curr. B: Out of Stock");
+                    } else {
+                        sb.append(ChatColor.RED).append("Curr. B: -$").append(df.format(total));
+                    }
+
+                    // Stack (64 max) Column
+                    total = getTotalCost(listing, 64);
+                    if (listing.getInventory() < 64) {
+                        sb.append(ChatColor.RED).append(" | Out of Stock");
+                    } else {
+                        sb.append(ChatColor.RED).append(" | -$").append(df.format(total));
+                    }
+
+                    // 10 Stacks (64 max) Column
+                    total = getTotalCost(listing, 640);
+                    if (listing.getInventory() < 640) {
+                        sb.append(ChatColor.RED).append(" | Out of Stock");
+                    } else {
+                        sb.append(ChatColor.RED).append(" | -$").append(df.format(total));
+                    }
+                }
             }
         }
+        sb.append("\n");
     }
 
     private void buildSellPrice(StringBuilder sb, ItemListing listing){
         if (CommandUtil.safeDoubleEqualsZero(listing.getSellPrice())) {
-            sb.append(ChatColor.WHITE).append(" S: n/a");
+            sb.append(ChatColor.WHITE).append("S: n/a");
         } else {
-            if (listing.isInfinite() || CommandUtil.safeDoubleEqualsZero(listing.getSellPrice()-listing.getBasePrice())) {
-                sb.append(ChatColor.WHITE).append(" S: +$").append(df.format(listing.getSellPrice()));
-            } else if (listing.getSellPrice() > listing.getBasePrice()) {
-                sb.append(ChatColor.GREEN).append(" S: +$").append(df.format(listing.getSellPrice()));
+            if (listing.isInfinite()) {
+                sb.append(ChatColor.WHITE).append("S: +$").append(df.format(listing.getSellPrice()));
             } else {
-                sb.append(ChatColor.RED).append(" S: +$").append(df.format(listing.getSellPrice()));
+                sb.append(ChatColor.GREEN).append("Curr. S: +$").append(df.format(listing.getSellPrice()));
+                sb.append(ChatColor.GREEN).append(" | +$").append(df.format(listing.getTotalSellPrice(64)));
+                sb.append(ChatColor.GREEN).append(" | +$").append(df.format(listing.getTotalSellPrice(640)));
             }
         }
+        sb.append("\n");
     }
 
     private void buildInventory(StringBuilder sb, ItemListing listing) {
         if (listing.isInfinite()) {
-            sb.append(ChatColor.WHITE).append(" Inv: inf");
+            sb.append(ChatColor.WHITE).append(" Inv: inf ");
         } else {
             sb.append(ChatColor.WHITE).append(" Inv: ").append(listing.getInventory());
         }
@@ -101,19 +128,23 @@ int a = 0;
     }
 
     private void replyWithListings(CommandSender sender, StringBuilder sb, int page) {
-        ChatPage cp = ChatPaginator.paginate(sb.toString(), page);
-        sender.sendMessage("[AdminMarket][Page "+page+" of " + cp.getTotalPages()+"] Prices frequently change.");
+        ChatPage cp = ChatPaginator.paginate(sb.toString(), page, ChatPaginator.AVERAGE_CHAT_PAGE_WIDTH, 9);
+
+        sender.sendMessage("[AdminMarket][Page "+page+" of " + cp.getTotalPages()+"]");
         sender.sendMessage("Use /shop price [item] for more price details.");
+        sender.sendMessage("Prices: <per 1 unit> | <per 1 stack> | <per 10 stacks>");
         for(String s : cp.getLines()) {
             sender.sendMessage(s);
         }
     }
 
     public boolean listCommand(CommandSender sender, String[] args) {
-        int page = 1;
+        int page;
         String sortBy = "abc";
         String sortOrder = "asc";
-
+    /*
+     * listCommand Input Validation
+     */
         try {
             page = args.length == 1 ?  1 : Integer.parseInt(args[1]);
         } catch (Exception e) {
@@ -121,7 +152,7 @@ int a = 0;
             return false;
         }
 
-         if(args.length == 4){
+        if(args.length == 4){
             if (args[3].equalsIgnoreCase("desc")){
                 sortOrder = "desc";
             }
@@ -129,14 +160,19 @@ int a = 0;
                 sortBy = "price";
             }
         }
-
+    /*
+     * listCommand Execution
+     */
         StringBuilder sb = new StringBuilder();
         List<ItemListing> listings = getListings(sortBy, sortOrder);
 
         for(ItemListing listing : listings) {
+            sb.append(ChatColor.GRAY).append(listing.getMaterialAsString());
+            sb.append(ChatColor.BLUE).append(" Base: $").append(df.format(listing.getBasePrice()));
+            sb.append(ChatColor.AQUA).append(" VAT: $").append(listing.getValueAddedTax());
+            buildInventory(sb, listing);
             buildBuyPrice(sb, listing);
             buildSellPrice(sb, listing);
-            buildInventory(sb, listing);
         }
 
         replyWithListings(sender, sb, page);
@@ -144,57 +180,29 @@ int a = 0;
         return true;
     }
 
-    public boolean priceCommand(CommandSender sender, String[] args) {
+    public boolean quoteCommand(CommandSender sender, String[] args) {
+        int amount;
         Material material = CommandUtil.materialFactory(args[1]);
-        
-        if (material == null) {
-            sender.sendMessage(ChatColor.RED + "Item not recognized!");
+        StringBuilder sb = new StringBuilder();
+
+        /*
+         * addCommand Input Validation
+         */
+        if (material == null) { sender.sendMessage("Item not in the shop!"); return false; }
+        try {
+            amount =  Integer.parseInt(args[2]);
+        } catch (Exception e) {
+            sender.sendMessage("Parameter not recognized!");
             return false;
         }
-
         ItemListing listing = listingDao.findItemListing(material);
+        sb.append(ChatColor.WHITE).append("Price quote for "+amount+" "+material.toString()+"\n");
+        sb.append(ChatColor.RED).append("Curr. B: +$").append(df.format(listing.getTotalBuyPrice(amount)));
+        sb.append(ChatColor.WHITE).append(" | ");
+        sb.append(ChatColor.GREEN).append("S: +$").append(df.format(listing.getTotalSellPrice(amount)));
 
-        if (listing == null) {
-            sender.sendMessage(ChatColor.RED + "This item is not in the shop.");
-            return true;
-        }
-
-        double buyPrice = listing.getBuyPrice();
-        double sellPrice = listing.getSellPrice();
-        double basePrice = listing.getBasePrice();
-        
-        String msg = material.toString() + " Inv: " + ChatColor.WHITE + listing.getInventory();
-        sender.sendMessage(msg);
-        msg = ChatColor.BLUE + "Base: $" + basePrice + ChatColor.WHITE + " Tax: " + ChatColor.RED + plugin.getPluginConfig().getSalesTax()*100 + "%";
-        sender.sendMessage(msg);
-        
-        StringBuilder sb = new StringBuilder();
-        if (CommandUtil.safeDoubleEqualsZero(buyPrice)) {
-            sb.append(ChatColor.WHITE).append("B: n/a");
-        } else {
-            if (listing.isInfinite()) {
-                sb.append(ChatColor.WHITE).append("B: -$").append(df.format(buyPrice));
-            } else if (buyPrice < basePrice) {
-                sb.append(ChatColor.GREEN).append("B: -$").append(df.format(buyPrice));
-            } else {
-                sb.append(ChatColor.RED).append(" B: -$").append(df.format(buyPrice));
-            }
-            
-        }
-        if (CommandUtil.safeDoubleEqualsZero(sellPrice)) {
-            sb.append(ChatColor.WHITE).append(" S: n/a");
-        } else {
-            if (listing.isInfinite()) {
-                sb.append(ChatColor.WHITE).append(" S: +$").append(df.format(sellPrice));
-            } else if (sellPrice > basePrice) {
-                sb.append(ChatColor.GREEN).append(" S: +$").append(df.format(sellPrice));
-            } else {
-                sb.append(ChatColor.RED).append(" S: +$").append(df.format(sellPrice));
-            }
-        }
-                
         sender.sendMessage(sb.toString());
-        
+
         return true;
     }
 }

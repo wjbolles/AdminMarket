@@ -1,7 +1,7 @@
 package com.wjbolles.command.actions;
 
 import com.wjbolles.AdminMarket;
-import com.wjbolles.adminmarket.utils.Consts;
+import com.wjbolles.adminmarket.utils.Constants;
 import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.dao.ItemListingDao;
 import com.wjbolles.eco.model.ItemListing;
@@ -20,15 +20,19 @@ public class ImportActions {
         this.plugin = plugin;
     }
 
-    public boolean importItemListings(){
+    public boolean importItemListings() {
         String row;
         try {
-            BufferedReader csvReader = new BufferedReader(new FileReader(Consts.PLUGIN_IMPORT));
+            BufferedReader csvReader = new BufferedReader(new FileReader(Constants.PLUGIN_IMPORT));
             while ((row = csvReader.readLine()) != null) {
                 String[] data = row.split(",");
                 Material material = CommandUtil.materialFactory(data[0]);
-                if (material == null) { continue; }
-                if (!CommandUtil.validStoreItem(material)) { continue; }
+                if (material == null) {
+                    continue;
+                }
+                if (!CommandUtil.isValidStoreItem(material)) {
+                    continue;
+                }
                 ItemListing listing = new ItemListingBuilder(material)
                         .setInfinite(Boolean.parseBoolean(data[1]))
                         .setInventory(Integer.parseInt(data[2]))
@@ -39,12 +43,12 @@ public class ImportActions {
                         .build();
                 try {
                     listingDao.insertItemListing(listing);
-                } catch (Exception e) {
-                    continue;
+                } catch (Exception ignored) {
+                    // TODO: Add log warnings for invalid rows
                 }
             }
             csvReader.close();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

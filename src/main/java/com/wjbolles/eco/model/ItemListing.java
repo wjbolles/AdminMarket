@@ -92,24 +92,24 @@ public class ItemListing {
         this.inventory -= inventory;
     }
 
+    private double getCurrentFloatingPrice(double inventory) {
+        double slope = (basePrice - basePrice * (1+config.getMaxPercentBasePrice()))/ -equilibrium;
+        double sellPrice = basePrice * (1+config.getMaxPercentBasePrice()) - slope * inventory;
+
+        double floor = basePrice - basePrice*config.getMaxPercentBasePrice();
+
+        if (sellPrice < floor) {
+            sellPrice = floor;
+        }
+        return sellPrice;
+    }
+
     public double getSellPrice() {
         return getSellPrice(this.inventory);
     }
 
     private double getSellPrice(int inventory) {
-        if(config.getUseFloatingPrices() && !isInfinite) {
-            double slope = (basePrice - basePrice * (1+config.getMaxPercentBasePrice()))/ -equilibrium;
-            double sellPrice = basePrice * (1+config.getMaxPercentBasePrice()) - slope * inventory;
-
-            double floor = basePrice - basePrice*config.getMaxPercentBasePrice();
-
-            if (sellPrice < floor) {
-                sellPrice = floor;
-            }
-            return sellPrice;
-        } else {
-            return basePrice;
-        }
+        return getBuyPrice(inventory+1);
     }
 
     public double getBuyPrice() {
@@ -117,10 +117,11 @@ public class ItemListing {
     }
 
     private double getBuyPrice(int inventory) {
-        double buyPrice = getSellPrice(inventory);
-        buyPrice = buyPrice + buyPrice * config.getSalesTax();
-        buyPrice = buyPrice + valueAddedTax;
-        return buyPrice;
+        if(config.getUseFloatingPrices() && !isInfinite) {
+            return getCurrentFloatingPrice(inventory);
+        } else {
+            return basePrice;
+        }
     }
 
     public double getBasePrice() {
@@ -143,7 +144,45 @@ public class ItemListing {
         this.equilibrium = equilibrium;
     }
 
-    public double getTotalSellPrice(int amount) {
+    private double integrate(int a_int, int b_int) {
+        double a = 0.5 + a_int;    // shifting the bounds 0.5 helps ensure
+        double b = 0.5 + b_int; // the calculated price is more accurate (https://introcs.cs.princeton.edu/java/93integration/TrapezoidalRule.java.html)
+        long N = Math.round(Math.log((b-a)) / Math.log(2)) * 2; // Do more rounds the more inventory there is for greater precision
+        if (N < 4) {
+            N = 4;
+        }
+        double h = (b - a) / N;
+        double sum = 0.5 * (getCurrentFloatingPrice(a) + getCurrentFloatingPrice(b));
+        for (int i = 1; i < N; i++) {
+            double x = a + h * i;
+            sum = sum + getCurrentFloatingPrice(x);
+        }
+
+        return (double) Math.round(sum * h * 100)/ 100;
+    }
+
+    public double getTotalSellPrice(int amount){
+        if (isInfinite) {
+            return getSellPrice() * amount;
+        }
+        double totalPrice = integrate(inventory, inventory+amount);
+
+        return totalPrice;
+    }
+
+    public double getTotalBuyPrice(int amount){
+        if (isInfinite) {
+            return getSellPrice() * amount;
+        }
+        double totalPrice = integrate(inventory-amount, inventory);
+
+        return totalPrice;
+    }
+
+    // Replaced with more efficient method that uses
+    // integration to approximate the total cost
+    @Deprecated
+    public double getTotalSellPriceLegacy(int amount) {
         if (isInfinite) {
             return getSellPrice() * amount;
         }
@@ -159,7 +198,10 @@ public class ItemListing {
         return total;
     }
 
-    public double getTotalBuyPrice(int amount) {
+    // Replaced with more efficient method that uses
+    // integration to approximate the total cost
+    @Deprecated
+    public double getTotalBuyPriceLegacy(int amount) {
         if (isInfinite) {
             return getBuyPrice() * amount;
         }
@@ -174,7 +216,6 @@ public class ItemListing {
             total += getBuyPrice(inventory);
             inventory--;
         }
-
         return total;
     }
 

@@ -271,11 +271,6 @@ public class InventoryFake implements PlayerInventory {
         return null;
     }
 
-    public ItemStack getItemInHand() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public ItemStack getLeggings() {
         // TODO Auto-generated method stub
         return null;
@@ -311,6 +306,16 @@ public class InventoryFake implements PlayerInventory {
 
     }
 
+    @Override
+    public ItemStack getItemInHand() {
+        return null;
+    }
+
+    @Override
+    public void setItemInHand(ItemStack itemStack) {
+
+    }
+
     public void setChestplate(ItemStack arg0) {
         // TODO Auto-generated method stub
 
@@ -328,11 +333,6 @@ public class InventoryFake implements PlayerInventory {
 
     public void setItem(int arg0, ItemStack arg1) {
         inventoryMock[arg0] = arg1;
-    }
-
-    public void setItemInHand(ItemStack arg0) {
-        // TODO Auto-generated method stub
-
     }
 
     public void setLeggings(ItemStack arg0) {

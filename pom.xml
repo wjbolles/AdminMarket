@@ -40,15 +40,6 @@
 			<version>${spigot.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!--Bukkit API-->
-		<!--
-		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>${spigot.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		-->
 		<!-- Other Plugins -->
 		<dependency>
 			<groupId>com.github.MilkBowl</groupId>
@@ -56,7 +47,6 @@
 			<version>${vault.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- Etc -->
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito2</artifactId>
@@ -68,14 +58,6 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.32.3.2</version>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.7.4</version>
-			<scope>test</scope>
-		</dependency>
-		-->
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>

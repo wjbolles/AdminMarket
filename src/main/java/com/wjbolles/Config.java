@@ -20,7 +20,7 @@ public class Config implements AdminMarketConfig {
     public static final String SETTING_USE_FLOATING_PRICES = "useFloatingPrices";
     public static final String SETTING_STORAGE = "storage";
 
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
 
     Config(JavaPlugin plugin) {
         this.plugin = plugin;

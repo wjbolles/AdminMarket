@@ -2,13 +2,12 @@ package com.wjbolles.eco.dao;
 
 import com.wjbolles.AdminMarket;
 import com.wjbolles.AdminMarketConfig;
-import com.wjbolles.adminmarket.utils.Consts;
+import com.wjbolles.adminmarket.utils.Constants;
 import com.wjbolles.command.CommandUtil;
 import com.wjbolles.eco.model.ItemListing;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,13 +17,13 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ItemListingYamlDao implements ItemListingDao {
+public class YamlItemListingDao implements ItemListingDao {
 
-    private AdminMarket plugin;
-    private Logger log;
-    private HashMap<String, ItemListing> listings = new HashMap<String, ItemListing>();
+    private final AdminMarket plugin;
+    private final Logger log;
+    private final HashMap<String, ItemListing> listings = new HashMap<>();
 
-    public ItemListingYamlDao(AdminMarket plugin) {
+    public YamlItemListingDao(AdminMarket plugin) {
         this.plugin = plugin;
         this.log = plugin.getLog();
 
@@ -34,7 +33,7 @@ public class ItemListingYamlDao implements ItemListingDao {
     public void loadItems() {
         log.info("Loading items...");
 
-        File itemsDir = new File(Consts.PLUGIN_ITEMS_DIR);
+        File itemsDir = new File(Constants.PLUGIN_ITEMS_DIR);
         
         File[] items = itemsDir.listFiles();
 
@@ -47,8 +46,7 @@ public class ItemListingYamlDao implements ItemListingDao {
                 e.printStackTrace();
             }
             assert listing != null;
-            ItemStack stack = new ItemStack(listing.getMaterial(), 1);
-            listings.put(generateStackKey(stack), listing);
+            listings.put(listing.getMaterialAsString(), listing);
         }
     }
 
@@ -57,6 +55,9 @@ public class ItemListingYamlDao implements ItemListingDao {
         yamlConf.load(itemConf);
 
         Material material = CommandUtil.materialFactory(yamlConf.getString("material"));
+        if (material == null) {
+            throw new Exception("Invalid material in YAML");
+        }
         boolean isInfinite = yamlConf.getBoolean("isInfinite");
 
         ItemListing listing = new ItemListing(material, isInfinite, config);
@@ -68,11 +69,6 @@ public class ItemListingYamlDao implements ItemListingDao {
 
         return listing;
 
-    }
-
-    @Deprecated
-    private String generateStackKey(ItemStack stack) {
-        return stack.getType().name();
     }
 
     public HashMap<String, ItemListing> getAllListings() {
@@ -118,8 +114,13 @@ public class ItemListingYamlDao implements ItemListingDao {
         listings.remove(key);
     }
 
+    @Override
+    public boolean listingExists(Material material) {
+        return findItemListing(material) != null;
+    }
+
     File getListingConfFile(ItemListing listing){
-        return new File(Consts.PLUGIN_ITEMS_DIR + File.separatorChar +
+        return new File(Constants.PLUGIN_ITEMS_DIR + File.separatorChar +
                 listing.getMaterial()+".yml");
     }
 
