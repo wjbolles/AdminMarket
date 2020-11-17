@@ -8,6 +8,7 @@
 
 package com.wjbolles;
 
+import com.wjbolles.adminmarket.AdminMarket;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -33,21 +34,21 @@ public abstract class AdminMarketTest {
 
     public static final File pluginDirectory = new File("plugins/AdminMarket");
     
-    protected boolean deleteDirectory(File directory) {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    protected void deleteDirectory(File directory) {
         if(directory.exists()){
             File[] files = directory.listFiles();
             if(null!=files){
-                for(int i=0; i<files.length; i++) {
-                    if(files[i].isDirectory()) {
-                        deleteDirectory(files[i]);
-                    }
-                    else {
-                        files[i].delete();
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        file.delete();
                     }
                 }
             }
         }
-        return(directory.delete());
+        directory.delete();
     }
 
     @After

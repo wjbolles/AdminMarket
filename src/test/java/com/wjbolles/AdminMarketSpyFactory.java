@@ -1,7 +1,8 @@
 package com.wjbolles;
 
-import com.wjbolles.eco.economy.BasicEconomyWrapperImpl;
-import com.wjbolles.eco.economy.EconomyWrapper;
+import com.wjbolles.adminmarket.AdminMarket;
+import com.wjbolles.adminmarket.eco.economy.BasicEconomyWrapper;
+import com.wjbolles.adminmarket.eco.economy.EconomyWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,7 +20,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.easymock.PowerMock;
 import org.powermock.api.mockito.PowerMockito;
@@ -58,15 +58,12 @@ public class AdminMarketSpyFactory {
     // Server/Plugin components
     private PluginDescriptionFile pluginDescriptionFile;
 
-    // Plugin Fields
-    private EconomyWrapper economy;
-    private Logger logger;
-
     public AdminMarketSpyFactory(){
         MockitoAnnotations.initMocks(this);
         MockGateway.MOCK_STANDARD_METHODS = false;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public AdminMarket getPlugin(){
         pluginDirectory.mkdirs();
         assertTrue(pluginDirectory.exists());
@@ -89,7 +86,7 @@ public class AdminMarketSpyFactory {
                 new File(pluginDirectory,
                 "testPluginFile")));
 
-        try { PowerMockito.doNothing().when(plugin, "setupCommands"); } catch (Exception e) {}
+        try { PowerMockito.doNothing().when(plugin, "setupCommands"); } catch (Exception ignored) {}
 
         doReturn(pluginDirectory).when(plugin).getDataFolder();
         doReturn(true).when(plugin).isEnabled();
@@ -101,8 +98,6 @@ public class AdminMarketSpyFactory {
         Whitebox.setInternalState(plugin, "server", mockServer);
         
         generateCommandSenderStubs();
-        
-        // Bukkit.setServer(mockServer);
 
         stubAdminMarketMethods();
 
@@ -121,31 +116,27 @@ public class AdminMarketSpyFactory {
 
     private void generateCommandSchedulerStubs() {
         when(mockScheduler.scheduleSyncDelayedTask(any(Plugin.class), any(Runnable.class), anyLong())).
-                thenAnswer(new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocation) throws Throwable {
-                        Runnable arg;
-                        try {
-                            arg = (Runnable) invocation.getArguments()[1];
-                        } catch (Exception e) {
-                            return null;
-                        }
-                        arg.run();
+                thenAnswer((Answer<Integer>) invocation -> {
+                    Runnable arg;
+                    try {
+                        arg = (Runnable) invocation.getArguments()[1];
+                    } catch (Exception e) {
                         return null;
-                    }});
+                    }
+                    arg.run();
+                    return null;
+                });
         when(mockScheduler.scheduleSyncDelayedTask(any(Plugin.class), any(Runnable.class))).
-                thenAnswer(new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocation) throws Throwable {
-                        Runnable arg;
-                        try {
-                            arg = (Runnable) invocation.getArguments()[1];
-                        } catch (Exception e) {
-                            return null;
-                        }
-                        arg.run();
+                thenAnswer((Answer<Integer>) invocation -> {
+                    Runnable arg;
+                    try {
+                        arg = (Runnable) invocation.getArguments()[1];
+                    } catch (Exception e) {
                         return null;
-                    }});
+                    }
+                    arg.run();
+                    return null;
+                });
         when(mockServer.getScheduler()).thenReturn(mockScheduler);
     }
 
@@ -153,12 +144,10 @@ public class AdminMarketSpyFactory {
         // Init our command sender
         final Logger commandSenderLogger = Logger.getLogger("CommandSender");
         commandSenderLogger.setParent(Logger.getLogger(AdminMarket.class.getName()));
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                commandSenderLogger.info(ChatColor.stripColor((String) invocation.getArguments()[0]));
-                return null;
-            }}).when(commandSender).sendMessage(anyString());
+        doAnswer((Answer<Void>) invocation -> {
+            commandSenderLogger.info(ChatColor.stripColor((String) invocation.getArguments()[0]));
+            return null;
+        }).when(commandSender).sendMessage(anyString());
         when(commandSender.getServer()).thenReturn(mockServer);
         when(commandSender.getName()).thenReturn("MockCommandSender");
         when(commandSender.isPermissionSet(anyString())).thenReturn(true);
@@ -171,17 +160,18 @@ public class AdminMarketSpyFactory {
 
     private void generatePluginDescriptorFileStubs() {
 
-        pluginDescriptionFile = PowerMockito.spy(new PluginDescriptionFile("AdminMarket", "0.0.1",
-                "com.wjbolles.AdminMarket"));
-        when(pluginDescriptionFile.getAuthors()).thenReturn(new ArrayList<String>());
+        pluginDescriptionFile = PowerMockito.spy(new PluginDescriptionFile("AdminMarket", "TEST",
+                "com.wjbolles.adminmarket.AdminMarket"));
+        when(pluginDescriptionFile.getAuthors()).thenReturn(new ArrayList<>());
     }
 
     private void stubAdminMarketMethods(){
-        this.logger = Logger.getAnonymousLogger();
+        Logger logger = Logger.getAnonymousLogger();
         doReturn(logger).when(plugin).getLog();
 
         // Override the economy to not use Vault
-        this.economy = new BasicEconomyWrapperImpl(new HashMap<String, Double>());
+        // Plugin Fields
+        EconomyWrapper economy = new BasicEconomyWrapper(new HashMap<>());
         this.plugin.setEconomyWrapper(economy);
 
         plugin.onEnable();

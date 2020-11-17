@@ -1,6 +1,6 @@
 name: AdminMarket
 version: 1.0
-main: com.wjbolles.AdminMarket
+main: com.wjbolles.adminmarket.AdminMarket
 description: A simple, command line driven marketplace for Spigot
 author: wjbolles
 website: https://github.com/wjbolles/

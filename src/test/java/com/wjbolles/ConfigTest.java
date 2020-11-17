@@ -1,6 +1,7 @@
 package com.wjbolles;
 
-import com.wjbolles.adminmarket.utils.Consts;
+import com.wjbolles.adminmarket.Config;
+import com.wjbolles.adminmarket.utils.Constants;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 public class ConfigTest extends AdminMarketTest {
     Config config = new Config(plugin);
-    File conf = new File(Consts.PLUGIN_CONF_DIR + File.separatorChar + "config.yml");
+    File conf = new File(Constants.PLUGIN_CONF_DIR + File.separatorChar + "config.yml");
     YamlConfiguration yamlConf = new YamlConfiguration();
 
     @Before
