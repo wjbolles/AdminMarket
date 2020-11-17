@@ -1,5 +1,6 @@
 package com.wjbolles;
 
+import com.wjbolles.adminmarket.Config;
 import com.wjbolles.adminmarket.utils.Constants;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.Before;

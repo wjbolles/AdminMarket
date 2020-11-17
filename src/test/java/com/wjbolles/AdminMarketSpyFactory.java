@@ -1,7 +1,8 @@
 package com.wjbolles;
 
-import com.wjbolles.eco.economy.BasicEconomyWrapper;
-import com.wjbolles.eco.economy.EconomyWrapper;
+import com.wjbolles.adminmarket.AdminMarket;
+import com.wjbolles.adminmarket.eco.economy.BasicEconomyWrapper;
+import com.wjbolles.adminmarket.eco.economy.EconomyWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -160,7 +161,7 @@ public class AdminMarketSpyFactory {
     private void generatePluginDescriptorFileStubs() {
 
         pluginDescriptionFile = PowerMockito.spy(new PluginDescriptionFile("AdminMarket", "TEST",
-                "com.wjbolles.AdminMarket"));
+                "com.wjbolles.adminmarket.AdminMarket"));
         when(pluginDescriptionFile.getAuthors()).thenReturn(new ArrayList<>());
     }
 

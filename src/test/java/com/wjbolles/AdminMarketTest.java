@@ -8,6 +8,7 @@
 
 package com.wjbolles;
 
+import com.wjbolles.adminmarket.AdminMarket;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;

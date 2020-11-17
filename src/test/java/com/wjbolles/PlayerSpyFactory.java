@@ -1,20 +1,10 @@
 package com.wjbolles;
 
-import com.wjbolles.fakes.InventoryFake;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.HumanEntity;
+import com.wjbolles.adminmarket.fakes.InventoryFake;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
 
 import static org.mockito.Mockito.doReturn;
 
